@@ -1,0 +1,8 @@
+usr/include/opencv2/cuda*.hpp
+usr/include/opencv2/cudev*.hpp
+usr/include/opencv2/cudalegacy/*
+usr/include/opencv2/cudev/*
+usr/lib/*/libopencv_cuda*.a
+usr/lib/*/libopencv_cudev*.a
+usr/lib/*/libopencv_cuda*.so
+usr/lib/*/libopencv_cudev*.so

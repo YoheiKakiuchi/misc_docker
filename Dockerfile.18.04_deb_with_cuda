@@ -1,0 +1,94 @@
+# FROM nvidia/cuda:11.0-devel-ubuntu18.04
+# FROM nvidia/cuda:11.0-cudnn8-devel-ubuntu18.04
+# FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04
+# FROM nvidia/cuda:10.2-cudnn8-devel-ubuntu18.04
+# FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
+# FROM nvidia/cuda:10.1-cudnn8-devel-ubuntu18.04
+# FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
+# FROM nvidia/cuda:9.2-cudnn7-devel-ubuntu18.04
+# FROM nvidia/cuda:9.1-cudnn7-devel ## 16.04
+# FROM nvidia/cuda:9.0-cudnn7-devel ## 16.04
+# FROM nvidia/cuda:8.0-cudnn6-devel ## 16.04
+
+## suc
+#FROM nvidia/cuda:9.2-cudnn7-devel-ubuntu18.04
+FROM nvidia/cuda:10.2-cudnn8-devel-ubuntu18.04
+
+ENV DEBIAN_FRONTEND noninteractive
+ENV NVIDIA_DRIVER_CAPABILITIES all
+
+ARG GPU_ARCH='6.1'
+# 5.2 5.0 3.5 3.0 2.0
+WORKDIR /tmp
+
+# Build tools
+RUN apt update && \
+    apt install -y -q -qq \
+    git cmake wget unzip build-essential \
+    sudo tzdata \
+    ant debhelper default-jdk dh-python doxygen javahelper \
+    libavcodec-dev libavformat-dev libavresample-dev libdc1394-22-dev libeigen3-dev libgdal-dev libgdcm2-dev \
+    libgl1-mesa-dev libglu1-mesa-dev libgoogle-glog-dev libgphoto2-dev libgtk-3-dev libjpeg-dev liblapack-dev \
+    libleptonica-dev libopenexr-dev libpng-dev libprotobuf-dev libraw1394-dev libswscale-dev libtbb-dev libtesseract-dev \
+    zlib1g-dev libtiff-dev libv4l-dev libvtk6-dev maven-repo-helper ocl-icd-opencl-dev protobuf-compiler \
+    python-dev python-numpy python3-dev python3-numpy vim && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN sed -i -e 's@# \(deb-src.*universe\)@\1@' /etc/apt/sources.list
+RUN apt update
+RUN apt source libopencv-dev
+
+WORKDIR /tmp/opencv-3.2.0+dfsg
+
+RUN sed -i -e "s@-DWITH_CUDA=OFF@-DWITH_CUDA=ON -DWITH_CUBLAS=ON -DWITH_CUFFT=ON -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs -DCUDA_ARCH_BIN=${GPU_ARCH} -DCUDA_ARCH_PTX=${GPU_ARCH}@" debian/rules
+#RUN sed -i -e "s@-DWITH_CUDA=OFF@-DWITH_CUDA=ON -DWITH_CUBLAS=ON -DWITH_CUFFT=ON -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs@" debian/rules
+#RUN sed -i -e "s@-DWITH_CUDA=OFF@-DWITH_CUDA=ON -DWITH_CUBLAS=ON -DWITH_CUFFT=ON@" debian/rules
+# -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs
+####RUN sed -i -e "s@-DWITH_CUDA=OFF@-DWITH_CUDA=ON -DCUDA_ARCH_BIN=${GPU_ARCH} -DCUDA_ARCH_PTX=${GPU_ARCH} -DWITH_CUBLAS=ON -DWITH_CUFFT=ON -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs@" debian/rules
+###
+
+# docker build -t testcv:11.0 -f Dockerfile.18.04_deb_with_cuda .
+# docker build -t testcv:9.2 -f Dockerfile.18.04_deb_with_cuda .
+# docker run -it --gpus=all -v $(pwd):/root/tmp testcv:xxx bash
+# cp /root/tmp/FindCUDA/* cmake/FindCUDA/
+# cp /root/tmp/FindCUDA.cmake cmake
+# cp /root/tmp/saturate_cast.hpp modules/cudev/include/opencv2/cudev/util
+# cp /root/tmp/libopencv-cuda* debian
+# cp /root/tmp/control debian
+#---
+# echo withcuda | dpkg-source --commit -q
+#
+# RUN dpkg-buildpackage -us -uc
+### check 'NVIDIA GPU arch:             61 '
+# cp ../*.deb /root/tmp
+#
+#### gstremer??
+#### example
+# Build OpenCV
+## RUN wget https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip && \
+##     unzip ${OPENCV_VERSION}.zip && rm ${OPENCV_VERSION}.zip && \
+##     mv opencv-${OPENCV_VERSION} OpenCV && \
+##     cd OpenCV && \
+##     wget https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && \
+##     unzip ${OPENCV_VERSION}.zip && \
+##     mkdir build && \
+##     cd build && \
+##     cmake \
+##       -D WITH_TBB=ON \
+##       -D CMAKE_BUILD_TYPE=RELEASE \
+##       -D BUILD_EXAMPLES=ON \
+##       -D WITH_FFMPEG=ON \
+##       -D WITH_V4L=ON \
+##       -D WITH_OPENGL=ON \
+##       -D WITH_CUDA=ON \
+##       -D CUDA_ARCH_BIN=${GPU_ARCH} \
+##       -D CUDA_ARCH_PTX=${GPU_ARCH} \
+##       -D WITH_CUBLAS=ON \
+##       -D WITH_CUFFT=ON \
+##       -D WITH_EIGEN=ON \
+##       -D EIGEN_INCLUDE_PATH=/usr/include/eigen3 \
+##       -D OPENCV_EXTRA_MODULES_PATH=../opencv_contrib-${OPENCV_VERSION}/modules/ \
+##       .. && \
+##     make all -j$(nproc) && \
+##     make install

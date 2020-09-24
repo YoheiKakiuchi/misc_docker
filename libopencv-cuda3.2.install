@@ -1,0 +1,2 @@
+usr/lib/*/libopencv_cuda*.so.*
+usr/lib/*/libopencv_cudev*.so.*
