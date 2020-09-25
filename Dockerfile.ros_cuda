@@ -1,0 +1,120 @@
+FROM nvidia/cuda:10.2-cudnn8-devel-ubuntu18.04
+
+ENV DEBIAN_FRONTEND noninteractive
+ENV NVIDIA_DRIVER_CAPABILITIES all
+
+WORKDIR /tmp
+
+## ROS
+RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu bionic main" > /etc/apt/sources.list.d/ros-latest.list'
+RUN apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+
+# Build tools
+RUN apt update && \
+    apt install -y -q -qq \
+    ros-melodic-desktop-full gdebi python-dev python-numpy python3-dev python3-numpy && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# dpkg -i libopencv-cuda3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb libopencv-cuda-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb libopencv-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+#
+# gdebi python3-opencv_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+
+## 3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## -dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## contrib
+## core
+## cuda
+## calib3d
+## features2d
+## flann
+## highgui
+## imgcodecs
+## imgproc
+## ml
+## objdetect
+## photo
+## shape
+## stitching
+## superres
+## video
+## videoio
+## videostab
+## viz
+## 
+## 
+## 
+## libopencv-contrib3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-contrib-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-core3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-core-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-cuda3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-cuda-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-calib3d3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-calib3d-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-features2d3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-features2d-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-flann3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-flann-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-highgui3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-highgui-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-imgcodecs3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-imgcodecs-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-imgproc3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-imgproc-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-ml3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-ml-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-objdetect3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-objdetect-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-photo3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-photo-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-shape3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-shape-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-stitching3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-stitching-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-superres3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-superres-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-video3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-video-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-videoio3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-videoio-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-videostab3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-videostab-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-viz3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## libopencv-viz-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## --
+## 
+## libopencv-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## libopencv-ts-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## python-opencv_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## python3-opencv_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## 
+## 
+## libopencv3.2-java_3.2.0+dfsg-4ubuntu0.1_all.deb
+## libopencv3.2-jni_3.2.0+dfsg-4ubuntu0.1_amd64.deb
+## opencv-data_3.2.0+dfsg-4ubuntu0.1_all.deb
+## opencv-doc_3.2.0+dfsg-4ubuntu0.1_all.deb
+## 
+## 
