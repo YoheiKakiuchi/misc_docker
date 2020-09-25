@@ -17,8 +17,10 @@ FROM nvidia/cuda:10.2-cudnn8-devel-ubuntu18.04
 ENV DEBIAN_FRONTEND noninteractive
 ENV NVIDIA_DRIVER_CAPABILITIES all
 
-ARG GPU_ARCH='6.1'
-# 5.2 5.0 3.5 3.0 2.0
+ARG GPU_ARCH='3.0 3.5 5.0 5.2 6.1'
+ARG PTX_ARCH='6.1'
+# 2.0 2.1 3.0 3.5 3.7 6.0 6.2 7.0 7.2 7.5 8.0 8.6
+
 WORKDIR /tmp
 
 # Build tools
@@ -31,7 +33,8 @@ RUN apt update && \
     libgl1-mesa-dev libglu1-mesa-dev libgoogle-glog-dev libgphoto2-dev libgtk-3-dev libjpeg-dev liblapack-dev \
     libleptonica-dev libopenexr-dev libpng-dev libprotobuf-dev libraw1394-dev libswscale-dev libtbb-dev libtesseract-dev \
     zlib1g-dev libtiff-dev libv4l-dev libvtk6-dev maven-repo-helper ocl-icd-opencl-dev protobuf-compiler \
-    python-dev python-numpy python3-dev python3-numpy vim && \
+    python-dev python-numpy python3-dev python3-numpy \
+    vim && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -41,16 +44,13 @@ RUN apt source libopencv-dev
 
 WORKDIR /tmp/opencv-3.2.0+dfsg
 
-RUN sed -i -e "s@-DWITH_CUDA=OFF@-DWITH_CUDA=ON -DWITH_CUBLAS=ON -DWITH_CUFFT=ON -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs -DCUDA_ARCH_BIN=${GPU_ARCH} -DCUDA_ARCH_PTX=${GPU_ARCH}@" debian/rules
-#RUN sed -i -e "s@-DWITH_CUDA=OFF@-DWITH_CUDA=ON -DWITH_CUBLAS=ON -DWITH_CUFFT=ON -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs@" debian/rules
-#RUN sed -i -e "s@-DWITH_CUDA=OFF@-DWITH_CUDA=ON -DWITH_CUBLAS=ON -DWITH_CUFFT=ON@" debian/rules
-# -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs
-####RUN sed -i -e "s@-DWITH_CUDA=OFF@-DWITH_CUDA=ON -DCUDA_ARCH_BIN=${GPU_ARCH} -DCUDA_ARCH_PTX=${GPU_ARCH} -DWITH_CUBLAS=ON -DWITH_CUFFT=ON -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs@" debian/rules
-###
+# GPU_ARCH
+RUN sed -i -e "s@-DWITH_CUDA=OFF@-DWITH_CUDA=ON -DWITH_CUBLAS=ON -DWITH_CUFFT=ON -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs -DCUDA_ARCH_BIN='${GPU_ARCH}' -DCUDA_ARCH_PTX='${PTX_ARCH}'@" debian/rules
+# no GPU_ARCH (may fail)
+# RUN sed -i -e "s@-DWITH_CUDA=OFF@-DWITH_CUDA=ON -DWITH_CUBLAS=ON -DWITH_CUFFT=ON -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs@" debian/rules
 
-# docker build -t testcv:11.0 -f Dockerfile.18.04_deb_with_cuda .
-# docker build -t testcv:9.2 -f Dockerfile.18.04_deb_with_cuda .
-# docker run -it --gpus=all -v $(pwd):/root/tmp testcv:xxx bash
+# docker build -t cv_deb:10.2 -f Dockerfile.18.04_deb_with_cuda .
+# docker run -it --gpus=all -v $(pwd):/root/tmp cv_deb:10.2 bash
 # cp /root/tmp/FindCUDA/* cmake/FindCUDA/
 # cp /root/tmp/FindCUDA.cmake cmake
 # cp /root/tmp/saturate_cast.hpp modules/cudev/include/opencv2/cudev/util
@@ -59,7 +59,9 @@ RUN sed -i -e "s@-DWITH_CUDA=OFF@-DWITH_CUDA=ON -DWITH_CUBLAS=ON -DWITH_CUFFT=ON
 #---
 # echo withcuda | dpkg-source --commit -q
 #
-# RUN dpkg-buildpackage -us -uc
+# dpkg-buildpackage -us -uc &> /dev/null
+# dpkg-buildpackage -us -uc &> /tmp/dpkg-build.log
+#
 ### check 'NVIDIA GPU arch:             61 '
 # cp ../*.deb /root/tmp
 #
