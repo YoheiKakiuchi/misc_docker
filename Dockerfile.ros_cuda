@@ -16,6 +16,9 @@ RUN apt update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+#
+# docker biuild -f Dockerfile.ros_cuda -t ros_cuda .
+# docker run -it -v /home/leus:/mnt ros_cuda:latest bash
 # dpkg -i libopencv-cuda3.2_3.2.0+dfsg-4ubuntu0.1_amd64.deb libopencv-cuda-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb libopencv-dev_3.2.0+dfsg-4ubuntu0.1_amd64.deb
 #
 # gdebi python3-opencv_3.2.0+dfsg-4ubuntu0.1_amd64.deb
