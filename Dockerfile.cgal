@@ -1,0 +1,18 @@
+
+
+cmake-curses-gui
+libmpfr-dev
+libgmp-dev
+
+wget https://github.com/CGAL/cgal/releases/download/v5.1/CGAL-5.1.tar.xz
+tar xvf CGAL-5.1.tar.xz
+
+mkdir build
+cd build
+cmake ../CGAL-5.1/ -DCMAKE_INSTALL_PREFIX=/opt/cgal -DWITH_Eigen3=ON -DWITH_demos=ON -DWITH_examples=ON -DCGAL_HEADER_ONLY=OFF
+
+# cmake ../CGAL-5.1/ -DCMAKE_INSTALL_PREFIX=/opt/cgal -DWITH_Eigen3=ON -DWITH_demos=ON -DWITH_examples=ON
+
+
+
+
