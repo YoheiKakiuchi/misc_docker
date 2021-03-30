@@ -1,0 +1,20 @@
+FROM image_name
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt update -q -qq && \
+    apt install -q -qq -y curl apt-transport-https apt-utils python-pip mesa-utils less && \
+    apt upgrade -q -qq -y && \
+    apt autoremove -y && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/
+    
+RUN pip install -U --ignore-installed supervisor supervisor_twiddler
+
+ADD my_entrypoint.sh /entrypoint.sh
+ADD my_entryrc       /entryrc
+ENTRYPOINT ["/entrypoint.sh"]
+
+ADD supervisord.conf /etc/supervisor/supervisord.conf
+CMD ["/usr/local/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
