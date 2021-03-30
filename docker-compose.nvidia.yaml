@@ -23,7 +23,9 @@ services:
     environment:
       - DISPLAY=:1
       - VGL_DISPLAY=:0 ## naitive display (running opengl)
-#      - ROS_HOSTNAME=localhost
+#      - DOCKER_ROS_SETUP=/catkin_ws/devel/setup.bash
+#      - DOCKER_ROS_IP=localhost
+#      - DOCKER_ROS_MASTER_URI=http://localhost:11311
     volumes:
       - /tmp/.X11-unix/X0:/tmp/.X11-unix/X0
     volumes_from:
