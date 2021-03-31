@@ -30,7 +30,6 @@ docker run ${OPT}    \
     --gpus 'all,"capabilities=compute,graphics,utility,display"' \
     ${NET_OPT}       \
     --env="DISPLAY"  \
-    --env="ROBOT=JAXON_RED" \
     --env="QT_X11_NO_MITSHM=1" \
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
     --name=${cname} \
