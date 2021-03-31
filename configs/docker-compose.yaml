@@ -14,13 +14,14 @@ services:
       interval: "1s"
       retries: 20
   simulator:
-    image: yoheikakiuchi/choreonoidsim:xserver
+    image: ___image_name___
     ipc: host
     network_mode: host
     security_opt:
       - seccomp:unconfined
-    ##command: [bash, -c, 'while true; do sleep 5; done'] ##for debug
-    command: [ /entrypoint_xserver.sh, rtmlaunch, hrpsys_choreonoid_tutorials, jaxon_red_choreonoid.launch ]
+    #command: // should be set at supervisord.conf
+    #command: [bash, -c, 'while true; do sleep 5; done'] ##for debug
+    #command: [ /entrypoint_xserver.sh, roslaunch, target_pkg, target.launch ]
     environment:
       - DISPLAY=:1
       - DOCKER_ROS_SETUP=/catkin_ws/devel/setup.bash
@@ -30,4 +31,4 @@ services:
       - xserver
     depends_on:
       - xserver
-    #volumes: []
+    volumes: [ '___user_directory___:/uesrdir' ]

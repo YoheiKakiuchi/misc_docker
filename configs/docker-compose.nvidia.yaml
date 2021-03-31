@@ -14,20 +14,24 @@ services:
       interval: "1s"
       retries: 20
   simulator:
-    image: your_docker_image_nvidia ## ADD your image name
+    image: ___image_name___
     ipc: host
     network_mode: host
     security_opt:
       - seccomp:unconfined
     runtime: nvidia
+    #command: // should be set at supervisord.conf
+    #command: [bash, -c, 'while true; do sleep 5; done'] ##for debug
+    #command: [ /entrypoint_xserver.sh, roslaunch, target_pkg, target.launch ]
     environment:
       - DISPLAY=:1
       - VGL_DISPLAY=:0 ## naitive display (running opengl)
-#      - DOCKER_ROS_SETUP=/catkin_ws/devel/setup.bash
-#      - DOCKER_ROS_IP=localhost
-#      - DOCKER_ROS_MASTER_URI=http://localhost:11311
+      - DOCKER_ROS_SETUP=/catkin_ws/devel/setup.bash
+      - DOCKER_ROS_MASTER_URI=http://localhost:11311
+      - DOCKER_ROS_IP=localhost
     volumes:
       - /tmp/.X11-unix/X0:/tmp/.X11-unix/X0
+      - '___user_directory___:/uesrdir'
     volumes_from:
       - xserver
     depends_on:
