@@ -1,10 +1,19 @@
 # build
 
-## using docker xserver
+./wrap_for_docker_xserver.sh --user-directory /path_to_dir --default-command 'sleep 1000' --nvidia your_image_name
 
-https://github.com/devrt/docker-xserver
+image for xserver: your_image_name_xserver
+docker-compose -f docker-compose.yaml -p project_name up
+
+build for xserver with nvidia: your_image_name_xserver_nvidia
+DISPLAY=:0 xhost +si:localuser:root
+docker-compose -f docker-compose.nvidia.yaml -p project_name up
+
+# description
 
 ## docker compose
+
+use newer version of docker-compose
 
 '''
 $ sudo apt-get remove docker-compose
@@ -13,23 +22,22 @@ $ sudo wget https://github.com/docker/compose/releases/download/${COMPOSE_VERSIO
 $ sudo chmod 755 /usr/local/bin/docker-compose
 '''
 
-## Build
+## using docker xserver
+
+https://github.com/devrt/docker-xserver
+
+## Build ( step by step )
 
 docker build -f Dockerfile.wrap_for_docker_xserver --build-arg BASE_IMAGE=your_build_image -t your_build_image_xserver .
 
-## Build
+## Build ( step by step for nvidia )
 
 wget https://github.com/hsr-project/tmc_wrs_binary/raw/master/Dockerfile.nvidia
 
 docker build -f Dockerfile.nvidia --build-arg BASE_IMAGE=your_build_image -t your_build_image_nvidia .
 
-
-## Run (normal)
-
-docker-compose -f docker-compose.yaml up
-
-
 ## Run with nvidia
 
 DISPLAY=:0 xhost +si:localuser:root
 docker-compose -f docker-compose.nvidia.yaml up
+
