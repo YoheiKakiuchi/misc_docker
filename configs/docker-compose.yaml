@@ -14,17 +14,20 @@ services:
       interval: "1s"
       retries: 20
   simulator:
-    image: your_docker_image ## ADD your image name
+    image: yoheikakiuchi/choreonoidsim:xserver
     ipc: host
     network_mode: host
     security_opt:
       - seccomp:unconfined
+    ##command: [bash, -c, 'while true; do sleep 5; done'] ##for debug
+    command: [ /entrypoint_xserver.sh, rtmlaunch, hrpsys_choreonoid_tutorials, jaxon_red_choreonoid.launch ]
     environment:
       - DISPLAY=:1
-#      - DOCKER_ROS_SETUP=/catkin_ws/devel/setup.bash
-#      - DOCKER_ROS_IP=localhost
-#      - DOCKER_ROS_MASTER_URI=http://localhost:11311
+      - DOCKER_ROS_SETUP=/catkin_ws/devel/setup.bash
+      - DOCKER_ROS_MASTER_URI=http://localhost:11311
+      - DOCKER_ROS_IP=localhost
     volumes_from:
       - xserver
     depends_on:
       - xserver
+    #volumes: []

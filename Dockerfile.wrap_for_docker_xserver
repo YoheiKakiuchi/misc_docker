@@ -1,10 +1,12 @@
-FROM image_name
+ARG BASE_IMAGE
+
+FROM ${BASE_IMAGE}
 
 SHELL ["/bin/bash", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt update -q -qq && \
-    apt install -q -qq -y curl apt-transport-https apt-utils python-pip mesa-utils less && \
+    apt install -q -qq -y curl apt-transport-https apt-utils python-pip mesa-utils less x11-xserver-utils && \
     apt upgrade -q -qq -y && \
     apt autoremove -y && \
     apt clean && \
@@ -13,6 +15,7 @@ RUN apt update -q -qq && \
 RUN pip install -U --ignore-installed supervisor supervisor_twiddler
 
 ADD my_entrypoint.sh /entrypoint.sh
+ADD my_entrypoint_xserver.sh /entrypoint_xserver.sh
 ADD my_entryrc       /entryrc
 ENTRYPOINT ["/entrypoint.sh"]
 

@@ -15,6 +15,10 @@ $ sudo chmod 755 /usr/local/bin/docker-compose
 
 ## Build
 
+docker build -f Dockerfile.wrap_for_docker_xserver --build-arg BASE_IMAGE=your_build_image -t your_build_image_xserver .
+
+## Build
+
 wget https://github.com/hsr-project/tmc_wrs_binary/raw/master/Dockerfile.nvidia
 
 docker build -f Dockerfile.nvidia --build-arg BASE_IMAGE=your_build_image -t your_build_image_nvidia .
