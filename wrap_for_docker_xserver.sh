@@ -48,6 +48,9 @@ sed -i -e "s@___user_directory___@${USER_DIR}@g"     docker-compose.yaml
 cp configs/supervisord.conf .
 sed -i -e "s@___default_command___@${DEFAULT_COMMAND}@g" supervisord.conf
 
+## my_entry ...
+(cd scripts; ./download_entry.sh)
+
 ### BUILD
 docker build --no-cache -f Dockerfile.wrap_for_docker_xserver --build-arg BASE_IMAGE=${in_image} -t ${in_image}_xserver .
 

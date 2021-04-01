@@ -6,7 +6,7 @@ SHELL ["/bin/bash", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt update -q -qq && \
-    apt install -q -qq -y curl apt-transport-https apt-utils python-pip mesa-utils less x11-xserver-utils && \
+    apt install -q -qq -y curl apt-transport-https apt-utils python-pip mesa-utils less x11-xserver-utils x11-utils && \
     apt upgrade -q -qq -y && \
     apt autoremove -y && \
     apt clean && \
