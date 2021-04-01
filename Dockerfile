@@ -2,7 +2,7 @@ FROM osrf/ros:melodic-desktop-full
 
 RUN apt update -q -qq && \
     apt install -q -qq -y python-pip ros-${ROS_DISTRO}-catkin python-wstools python-catkin-tools && \
-    apt install -q -qq -y less emacs && \
+    apt install -q -qq -y apt-utils less emacs && \
     apt clean && \
     rm -rf /var/lib/apt/lists/
 
