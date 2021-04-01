@@ -20,6 +20,17 @@ RUN apt-get update && apt-get install -y \
   llvm-6.0-runtime clang-format-6.0 python-clang-6.0 lld-6.0
 ENV CC=/usr/bin/clang-6.0 CXX=/usr/bin/clang++-6.0
 
+RUN apt install -q -y libllvm9 llvm-9 llvm-9-dev llvm-9-runtime
+RUN apt install -q -y clang-9 clang-tools-9 libclang-common-9-dev libclang-9-dev libclang1-9 clang-format-9 clangd-9
+RUN apt install -q -y lldb-9 lld-9 libc++-9-dev libc++abi-9-dev
+
+#RUN apt install -q -qq -y \
+#    libllvm-9-ocaml-dev libllvm9 llvm-9 llvm-9-dev llvm-9-doc llvm-9-examples llvm-9-runtime \
+#    clang-9 clang-tools-9 clang-9-doc libclang-common-9-dev libclang-9-dev libclang1-9 clang-format-9 python-clang-9 clangd-9 lldb \
+#    lldb-9 lld \
+#    lld-9 libc++ \
+#    libc++-9-dev libc++abi-9-dev
+
 # Copy the entire clasp directory less .dockerignore and clean the build dir
 RUN mkdir -p /home/app
 RUN mkdir -p /opt/clasp
@@ -38,7 +49,7 @@ WORKDIR /home/app/clasp
 RUN rm -rf build/* && mkdir -p /opt/clasp
 
 # checkout submodules, configure, and build
-RUN echo "LLVM_CONFIG_BINARY='/usr/bin/llvm-config-6.0'" > wscript.config
+RUN echo "LLVM_CONFIG_BINARY='/usr/bin/llvm-config-9'" > wscript.config
 RUN echo "PREFIX='/opt/clasp'" >> wscript.config
 RUN echo "CLASP_VERSION='clasp_docker'" >> wscript.config
 RUN echo "USE_PARALLEL_BUILD = True" >> wscript.config
@@ -57,16 +68,24 @@ RUN git clone --depth=1 https://github.com/slime/slime $HOME/slime
 #-># && git clone --depth=1 https://github.com/clasp-developers/uuid.git \
 #-># && git clone --depth=1 https://github.com/clasp-developers/bordeaux-threads.git \
 #-># && git clone --depth=1 https://github.com/clasp-developers/cffi.git
+#RUN cd $HOME/quicklisp/local-projects \
+# && git clone --depth=1 https://github.com/clasp-developers/usocket.git \
+# && git clone --depth=1 https://github.com/drmeister/cl-jupyter.git \
+# && git clone --depth=1 https://github.com/clasp-developers/cl-jupyter-widgets.git \
+# && git clone --depth=1 https://github.com/clasp-developers/cl-nglview.git \
+# && git clone --depth=1 https://github.com/clasp-developers/cl-bqplot.git \
+# && git clone --depth=1 https://github.com/clasp-developers/trivial-backtrace.git \
+# && git clone --depth=1 https://github.com/clasp-developers/uuid.git \
+# && git clone --depth=1 https://github.com/clasp-developers/bordeaux-threads.git \
+# && git clone --depth=1 https://github.com/clasp-developers/cffi.git
+
 RUN cd $HOME/quicklisp/local-projects \
- && git clone --depth=1 https://github.com/clasp-developers/usocket.git \
  && git clone --depth=1 https://github.com/drmeister/cl-jupyter.git \
  && git clone --depth=1 https://github.com/clasp-developers/cl-jupyter-widgets.git \
  && git clone --depth=1 https://github.com/clasp-developers/cl-nglview.git \
  && git clone --depth=1 https://github.com/clasp-developers/cl-bqplot.git \
- && git clone --depth=1 https://github.com/clasp-developers/trivial-backtrace.git \
  && git clone --depth=1 https://github.com/clasp-developers/uuid.git \
- && git clone --depth=1 https://github.com/clasp-developers/bordeaux-threads.git \
- && git clone --depth=1 https://github.com/clasp-developers/cffi.git
+ && git clone --depth=1 https://github.com/clasp-developers/bordeaux-threads.git
 
 RUN ./waf configure
 RUN ./waf -j $(nproc) build_iboehm
