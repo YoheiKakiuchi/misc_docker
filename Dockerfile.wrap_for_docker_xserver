@@ -6,18 +6,8 @@ SHELL ["/bin/bash", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt update -q -qq && \
-    apt install -q -qq -y curl apt-transport-https apt-utils python-pip mesa-utils less x11-xserver-utils x11-utils && \
+    apt install -q -qq -y apt-utils mesa-utils less x11-xserver-utils x11-utils && \
     apt upgrade -q -qq -y && \
     apt autoremove -y && \
     apt clean && \
     rm -rf /var/lib/apt/lists/
-    
-RUN pip install -U --ignore-installed supervisor supervisor_twiddler
-
-ADD scripts/my_entrypoint.sh         /entrypoint.sh
-ADD scripts/my_entrypoint_xserver.sh /entrypoint_xserver.sh
-ADD scripts/my_entryrc               /entryrc
-ENTRYPOINT ["/entrypoint.sh"]
-
-ADD supervisord.conf /etc/supervisor/supervisord.conf
-CMD ["/usr/local/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]

@@ -13,6 +13,14 @@ do
             DEFUALT_COMMAND=$2
             shift
             ;;
+        --ros)
+            USE_ROS=true
+            shift
+            ;;
+        --supervisor)
+            USE_SUPERVISOR=true
+            shift
+            ;;
         --user-directory)
             USER_DIR=$2
             shift

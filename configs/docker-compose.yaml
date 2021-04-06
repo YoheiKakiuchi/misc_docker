@@ -24,10 +24,10 @@ services:
     #command: [ /entrypoint_xserver.sh, roslaunch, target_pkg, target.launch ]
     environment:
       - DISPLAY=:1
-      - DOCKER_ROS_SETUP=/catkin_ws/devel/setup.bash
-      - ROS_MASTER_URI=http://localhost:11311
-      - ROS_IP=localhost
-      - ROS_HOSTNAME=localhost
+      # - DOCKER_ROS_SETUP=/catkin_ws/devel/setup.bash
+      # - ROS_MASTER_URI=http://localhost:11311
+      # - ROS_IP=localhost
+      # - ROS_HOSTNAME=localhost
       # - ROS_HOME=/ros_home
     volumes_from:
       - xserver
