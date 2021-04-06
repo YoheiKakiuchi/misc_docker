@@ -1,0 +1,22 @@
+##
+## git clone git clone https://gitlab.jsk.imi.i.u-tokyo.ac.jp/rcb4eus/rcb4eus.git
+##
+FROM osrf/ros:melodic-desktop-full
+
+SHELL ["/bin/bash", "-c"]
+
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt update -y -q && \
+    apt install -q -qq -y \
+    wget curl libftdi1 libopenblas-dev gifsicle \
+    ros-${ROS_DISTRO}-jsk-pr2eus ros-${ROS_DISTRO}-euscollada ros-${ROS_DISTRO}-eusurdf \
+    ros-${ROS_DISTRO}-eus-assimp ros-${ROS_DISTRO}-roseus-smach ros-${ROS_DISTRO}-openhrp3  && \
+    apt clean -q -y && \
+    rm -rf /var/lib/apt/lists/
+
+WORKDIR /workdir
+COPY rcb4eus rcb4eus
+
+WORKDIR /workdir/rcb4eus
+RUN source /opt/ros/${ROS_DISTRO}/setup.bash && make
