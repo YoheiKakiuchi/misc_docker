@@ -1,0 +1,18 @@
+ARG BASE_IMAGE
+
+FROM ${BASE_IMAGE}
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND noninteractive
+
+RUN apt update -q -qq && \
+    apt install -q -qq -y curl apt-transport-https apt-utils python-pip && \
+    apt upgrade -q -qq -y && \
+    apt autoremove -y && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/
+##
+RUN pip install -U --ignore-installed supervisor supervisor_twiddler
+
+ADD supervisord.conf /etc/supervisor/supervisord.conf
+CMD ["/usr/local/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]

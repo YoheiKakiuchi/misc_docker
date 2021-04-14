@@ -1,13 +1,13 @@
 #!/bin/bash
 
 if [ ! -e my_entrypoint.sh ]; then
-    wget https://raw.githubusercontent.com/YoheiKakiuchi/misc_docker/master/my_entrypoint.sh
+    wget https://raw.githubusercontent.com/YoheiKakiuchi/misc_docker/master/my_entrypoint.sh -q
     chmod a+x my_entrypoint.sh
     sed -i -e 's@my_entryrc@entryrc@' my_entrypoint.sh
 fi
 
 if [ ! -e my_entryrc ]; then
-    wget https://raw.githubusercontent.com/YoheiKakiuchi/misc_docker/master/my_entryrc
+    wget https://raw.githubusercontent.com/YoheiKakiuchi/misc_docker/master/my_entryrc -q
 fi
 
 if [ ! -e my_entrypoint_xserver.sh ]; then

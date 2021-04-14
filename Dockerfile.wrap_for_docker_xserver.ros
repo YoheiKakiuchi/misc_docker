@@ -1,0 +1,11 @@
+ARG BASE_IMAGE
+
+FROM ${BASE_IMAGE}
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND noninteractive
+    
+ADD scripts/my_entrypoint.sh         /entrypoint.sh
+ADD scripts/my_entrypoint_xserver.sh /entrypoint_xserver.sh
+ADD scripts/my_entryrc               /entryrc
+ENTRYPOINT ["/entrypoint.sh"]
