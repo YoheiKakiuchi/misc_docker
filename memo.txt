@@ -1,0 +1,49 @@
+### ROS system
+
+apt update
+
+apt remove 'gazebo...'
+
+apt remove '.*gazebo.*' '.*sdformat.*' '.*ignition-math.*' '.*ignition-msgs.*' '.*ignition-transport.*'
+
+apt autoremove
+
+apt update
+
+
+
+WORKDIR build_gazebo
+git clone https://github.com/osrf/gazebo
+git checkout -b release9.0 gazebo9_9.0.0
+
+WORKDIR build_gazebo/gazebo/build
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local/gazebo ../
+
+make -j$(nproc)
+
+make install
+
+
+## gazebo -e bullet
+## gazebo -e dart
+## gazebo -e simbody
+
+### gazebo_ros_pkgs...
+
+mkdir -p ~/catkin_ws/src
+
+cd ~/catkin_ws/src
+catkin_init_workspace
+
+echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
+
+cd ~/catkin_ws/src
+git clone https://github.com/ros-simulation/gazebo_ros_pkgs.git
+git checkout ...
+
+rosdep update
+
+rosdep install -q -r -y --from-paths . --ignore-src
+
+catkin_make
