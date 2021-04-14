@@ -1,0 +1,19 @@
+FROM osrf/ros:kinetic-desktop-full
+## docker build -f Dockerfile.openrave -t yoheikakiuchi/openrave .
+ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES},display
+
+### ROS installl
+# install packages
+RUN apt-get update -q -qq && apt-get install -q -qq -y \
+    ros-kinetic-openrave \
+    ros-kinetic-euscollada \
+    mayavi2 python-enthoughtbase python-pip \
+    && apt-get dist-upgrade -q -qq -y \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /pythonlib
+RUN pip install sympy==0.7.1 -t /pythonlib
+
+# setup environment
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
