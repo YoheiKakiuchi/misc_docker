@@ -32,7 +32,7 @@ services:
       # - ROS_HOSTNAME=localhost
       # - ROS_HOME=/ros_home
     volumes:
-      - '___user_directory___:/uesrdir'
+      - '___user_directory___:/userdir'
     volumes_from:
       - xserver
     depends_on:
