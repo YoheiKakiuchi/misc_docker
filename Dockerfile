@@ -1,5 +1,8 @@
-FROM osrf/ros:melodic-desktop
-##
+ARG BASE_IMAGE
+#FROM osrf/ros:melodic-desktop
+FROM ${BASE_IMAGE}
+
+## gazebo versions
 # gazebo9_9.0.0
 # gazebo9_9.1.0
 # gazebo9_9.1.1
@@ -29,9 +32,11 @@ FROM osrf/ros:melodic-desktop
 #ARG _BUILD_GAZEBO_VERSION=9
 #ARG _BUILD_GAZEBO_TAG=gazebo9_9.0.0
 #ARG _BUILD_GZ_ROS_PKG_TAG=2.8.7
+##
 #ARG _BUILD_GAZEBO_VERSION=9
 #ARG _BUILD_GAZEBO_TAG=gazebo9_9.16.0
 #ARG _BUILD_GZ_ROS_PKG_TAG=2.8.7
+##
 ARG _BUILD_GAZEBO_VERSION=11
 ARG _BUILD_GAZEBO_TAG=gazebo11_11.0.0
 ARG _BUILD_GZ_ROS_PKG_TAG=2.8.7
