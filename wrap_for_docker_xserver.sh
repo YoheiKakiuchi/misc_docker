@@ -38,6 +38,9 @@ do
             echo "option: --output-directory arg"
             exit 0
             ;;
+        --*)
+            "invalid option: $1"
+            ;;
         *)
             if [ ! "$OPT" = "" ]; then
                 in_image=$OPT
@@ -111,5 +114,5 @@ if [ ! "${USE_VGL}" = "" ]; then
     fi
 
     ### BUILD
-    docker build --no-cache -f Dockerfile.nvidia --build-arg BASE_IMAGE=${in_image}_xserver -t ${in_image}_xserver_vgl .
+    docker build --no-cache -f Dockerfile.virtualgl --build-arg BASE_IMAGE=${in_image}_xserver -t ${in_image}_xserver_vgl .
 fi

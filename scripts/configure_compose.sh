@@ -44,6 +44,9 @@ do
             echo "option: --docker-directory arg"
             exit 0
             ;;
+        --*)
+            "invalid option: $1"
+            ;;
         *)
             if [ ! "$OPT" = "" ]; then
                 in_image=$OPT
