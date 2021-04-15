@@ -2,15 +2,25 @@
 
 ## repo/name:tag -> repo/name:tag_xserver -> repo/name:tag_xserver_nvidia
 
-for OPT in "$@"
+OPT=$1
+while [ ! "$OPT" = "" ];
 do
+    # echo "OPT: $OPT"
     case $OPT in
-        --nvidia)
-            USE_NVIDIA=true
-            ;;
         --default-command)
             DEFUALT_COMMAND=$2
             shift
+            ;;
+        --user-directory)
+            USER_DIR=$2
+            shift
+            ;;
+        --output-directory)
+            OUTPUT_DIR=$2
+            shift
+            ;;
+        --nvidia)
+            USE_NVIDIA=true
             ;;
         --ros)
             USE_ROS=true
@@ -18,13 +28,24 @@ do
         --supervisor)
             USE_SUPERVISOR=true
             ;;
-        --user-directory)
-            USER_DIR=$2
-            shift
+        --help)
+            echo "$0 [option] image_name"
+            echo "option: --nvidia"
+            echo "option: --ros"
+            echo "option: --supervisor"
+            echo "option: --default-command arg"
+            echo "option: --user-directory arg"
+            echo "option: --output-directory arg"
+            exit 0
+            ;;
+        *)
+            if [ ! "$OPT" = "" ]; then
+                in_image=$OPT
+            fi
             ;;
     esac
-    in_image=$OPT
     shift
+    OPT=$1
 done
 
 if [ "${in_image}" = "" ]; then
@@ -43,6 +64,11 @@ fi
 if [ "${DEFAULT_COMMAND}" = "" ]; then
     DEFAULT_COMMAND="bash -c 'while true; do sleep 5; done'";
 fi
+
+echo "in_image: ${in_image}"
+echo "USER_DIR: ${USER_DIR}"
+# echo "OUTPUT_DIR: ${OUTPUT_DIR}"
+echo "DEFAULT_COMMAND: ${DEFAULT_COMMAND}"
 
 ## docker-compose.yaml, docker-compose.nvidia.yaml
 cp configs/docker-compose.yaml .
