@@ -19,8 +19,8 @@ do
             OUTPUT_DIR=$2
             shift
             ;;
-        --nvidia)
-            USE_NVIDIA=true
+        --virtualgl)
+            USE_VGL=true
             ;;
         --ros)
             USE_ROS=true
@@ -53,10 +53,6 @@ if [ "${in_image}" = "" ]; then
     exit 1
 fi
 
-if [ "${USER_DIR}" = "" ]; then
-    USER_DIR=$(pwd)
-fi
-
 if [ "${OUTPUT_DIR}" = "" ]; then
     OUTPUT_DIR='./'
 fi
@@ -73,7 +69,9 @@ echo "DEFAULT_COMMAND: ${DEFAULT_COMMAND}"
 ## docker-compose.yaml, docker-compose.nvidia.yaml
 cp configs/docker-compose.yaml .
 sed -i -e "s@___image_name___@${in_image}_xserver@g" docker-compose.yaml
-sed -i -e "s@___user_directory___@${USER_DIR}@g"     docker-compose.yaml
+if [ ! "${USER_DIR}" = "" ]; then
+    sed -i -e "s@___user_directory___@${USER_DIR}@g"     docker-compose.yaml
+fi
 
 ### BUILD
 docker build --no-cache -f Dockerfile.wrap_for_docker_xserver --build-arg BASE_IMAGE=${in_image} -t ${in_image}_xserver .
@@ -97,20 +95,21 @@ if [ "${USE_ROS}" = "true" ]; then
     docker build --no-cache -f Dockerfile.wrap_for_docker_xserver.ros --build-arg BASE_IMAGE=${in_image}_xserver -t ${in_image}_xserver .
 fi
 
-## for NVIDIA
-if [ ! "${USE_NVIDIA}" = "" ]; then
-    if [ ! -e Dockerfile.nvidia ]; then
-        wget https://github.com/hsr-project/tmc_wrs_binary/raw/master/Dockerfile.nvidia -O Dockerfile.nvidia
-    fi
+## for VirtualGL
+if [ ! "${USE_VGL}" = "" ]; then
+    #if [ ! -e Dockerfile.nvidia ]; then
+    #    wget https://github.com/hsr-project/tmc_wrs_binary/raw/master/Dockerfile.nvidia -O Dockerfile.virtualgl
+    #fi
+    #if [ ! $(grep -c vglrun Dockerfile.virtualgl) -eq 0 ]; then
+    #    sed -i -e '$d' Dockerfile.virtualgl
+    #fi
 
-    if [ ! $(grep -c vglrun Dockerfile.nvidia) -eq 0 ]; then
-        sed -i -e '$d' Dockerfile.nvidia
+    cp configs/docker-compose.vgl.yaml .
+    sed -i -e "s@___image_name___@${in_image}_xserver_vgl@g" docker-compose.vgl.yaml
+    if [ ! "${USER_DIR}" = "" ]; then
+        sed -i -e "s@___user_directory___@${USER_DIR}@g"     docker-compose.vgl.yaml
     fi
-
-    cp configs/docker-compose.nvidia.yaml .
-    sed -i -e "s@___image_name___@${in_image}_xserver_nvidia@g" docker-compose.nvidia.yaml
-    sed -i -e "s@___user_directory___@${USER_DIR}@g"            docker-compose.nvidia.yaml
 
     ### BUILD
-    docker build --no-cache -f Dockerfile.nvidia --build-arg BASE_IMAGE=${in_image}_xserver -t ${in_image}_xserver_nvidia .
+    docker build --no-cache -f Dockerfile.nvidia --build-arg BASE_IMAGE=${in_image}_xserver -t ${in_image}_xserver_vgl .
 fi
