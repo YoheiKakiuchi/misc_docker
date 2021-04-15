@@ -13,7 +13,7 @@ services:
       test: ["CMD-SHELL", "test -e /tmp/.X11-unix/X1"]
       interval: "1s"
       retries: 20
-  simulator:
+  main:
     image: ___image_name___
     ipc: host
     network_mode: host
@@ -23,9 +23,11 @@ services:
     #command: // should be set at supervisord.conf
     #command: [bash, -c, 'while true; do sleep 5; done'] ##for debug
     #command: [ /entrypoint_xserver.sh, roslaunch, target_pkg, target.launch ]
+    #command:___command___
     environment:
       - DISPLAY=:1
       - VGL_DISPLAY=:0 ## naitive display (running opengl)
+      # - ___extra-environment-variables___
       # - DOCKER_ROS_SETUP=/catkin_ws/devel/setup.bash
       # - ROS_MASTER_URI=http://localhost:11311
       # - ROS_IP=localhost
