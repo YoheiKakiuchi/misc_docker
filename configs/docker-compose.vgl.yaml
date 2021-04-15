@@ -1,3 +1,4 @@
+## before running: xhost +si:localuser:root                                                                                                         ## after running: xhost -local:root
 version: "2.3"
 services:
   xserver:
