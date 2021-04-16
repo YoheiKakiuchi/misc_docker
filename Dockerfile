@@ -122,6 +122,14 @@ ENV PKG_CONFIG_PATH /usr/local/gazebo/lib/pkgconfig:${PKG_CONFIG_PATH}
 
 ## gazebo_ros_pkgs 2.8.7 is latest .deb version of melodic
 ## update dependency (may add gazebo files) and remove gazebo files
+## removed by skip-keys
+##>>> rosdep install -q -r -y --from-paths . --ignore-src --skip-keys=gazebo9 --skip-keys=libgazebo9-dev && \
+# apt remove -s -q -qq -y '.*gazebo.*' '.*sdformat.*' '.*ignition-math.*' '.*ignition-msgs.*' '.*ignition-transport.*' && \
+# apt autoremove -y && \
+# wget https://raw.githubusercontent.com/ignition-tooling/release-tools/master/jenkins-scripts/lib/dependencies_archive.sh -O /tmp/dependencies.sh && \
+# GAZEBO_MAJOR_VERSION=${_BUILD_GAZEBO_VERSION} ROS_DISTRO=${ROS_DISTRO} . /tmp/dependencies.sh && \
+# echo $BASE_DEPENDENCIES $GAZEBO_BASE_DEPENDENCIES | tr -d '\\' | xargs apt -q -qq -y install && \
+##<<< apt clean && rm -rf /var/lib/apt/lists/ && \
 #WORKDIR /gazebo_ros_pkg_ws/src
 RUN mkdir -p /gazebo_ros_pkg_ws/src; cd /gazebo_ros_pkg_ws/src && \
     if [ "${ROS_SOURCE}" = "" ]; then source /opt/ros/${ROS_DISTRO}/setup.bash; else source ${ROS_SOURCE}; fi && \
@@ -130,12 +138,7 @@ RUN mkdir -p /gazebo_ros_pkg_ws/src; cd /gazebo_ros_pkg_ws/src && \
     (cd gazebo_ros_pkgs; git checkout -b build_${_BUILD_GZ_ROS_PKG_TAG} ${_BUILD_GZ_ROS_PKG_TAG} ) && \
     apt update -q -qq && \
     rosdep update -q && \
-    rosdep install -q -r -y --from-paths . --ignore-src && \
-    apt remove -q -qq -y '.*gazebo.*' '.*sdformat.*' '.*ignition-math.*' '.*ignition-msgs.*' '.*ignition-transport.*' && \
-    apt autoremove -y && \
-    wget https://raw.githubusercontent.com/ignition-tooling/release-tools/master/jenkins-scripts/lib/dependencies_archive.sh -O /tmp/dependencies.sh && \
-    GAZEBO_MAJOR_VERSION=${_BUILD_GAZEBO_VERSION} ROS_DISTRO=${ROS_DISTRO} . /tmp/dependencies.sh && \
-    echo $BASE_DEPENDENCIES $GAZEBO_BASE_DEPENDENCIES | tr -d '\\' | xargs apt -q -qq -y install && \
+    rosdep install -q -r -y --from-paths . --ignore-src --skip-keys=gazebo9 --skip-keys=libgazebo9-dev && \
     apt clean && rm -rf /var/lib/apt/lists/ && \
     cd /gazebo_ros_pkg_ws && \
     if [ "${ROS_SOURCE}" = "" ]; then source /opt/ros/${ROS_DISTRO}/setup.bash; else source ${ROS_SOURCE}; fi && \
