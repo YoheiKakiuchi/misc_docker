@@ -70,39 +70,74 @@ RUN apt-add-repository -y ppa:dartsim && \
     apt clean && \
     rm -rf /var/lib/apt/lists/
 
-WORKDIR /build_gazebo
-RUN git clone https://github.com/osrf/gazebo
+#> WORKDIR /build_gazebo
+#> RUN git clone https://github.com/osrf/gazebo
+#> 
+#> WORKDIR /build_gazebo/gazebo
+#> RUN git checkout -b build_${_BUILD_GAZEBO_TAG} ${_BUILD_GAZEBO_TAG}
+#> 
+#> WORKDIR /build_gazebo/gazebo/build
+#> RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local/gazebo ../
+#> RUN make -j$(nproc)
+#> RUN make install
 
-WORKDIR /build_gazebo/gazebo
-RUN git checkout -b build_${_BUILD_GAZEBO_TAG} ${_BUILD_GAZEBO_TAG}
-
-WORKDIR /build_gazebo/gazebo/build
-RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local/gazebo ../
-RUN make -j$(nproc)
-RUN make install
+WORKDIR /
+RUN mkdir build_gazebo; cd build_gazebo && \
+    git clone https://github.com/osrf/gazebo && \
+    cd gazebo && \
+    git checkout -b build_${_BUILD_GAZEBO_TAG} ${_BUILD_GAZEBO_TAG} && \
+    mkdir build; cd build && \
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local/gazebo ../ && \ 
+    make -j$(nproc) && \
+    make install && \
+    cd /; rm -rf build_gazebo
 
 RUN echo '/usr/local/gazebo/lib' > /etc/ld.so.conf.d/gazebo.conf && ldconfig
 
-WORKDIR /gazebo_ros_pkg_ws/src
-RUN source /opt/ros/${ROS_DISTRO}/setup.bash && catkin_init_workspace
+ENV LD_LIBRARY_PATH /usr/local/gazebo/lib:${LD_LIBRARY_PATH}
+ENV PATH /usr/local/gazebo/bin:${PATH}
+ENV PKG_CONFIG_PATH /usr/local/gazebo/lib/pkgconfig:${PKG_CONFIG_PATH}
+
+##
+#> WORKDIR /gazebo_ros_pkg_ws/src
+#> RUN source /opt/ros/${ROS_DISTRO}/setup.bash && catkin_init_workspace
+#> 
+#> ## gazebo_ros_pkgs 2.8.7 is latest .deb version of melodic
+#> RUN git clone https://github.com/ros-simulation/gazebo_ros_pkgs.git && (cd gazebo_ros_pkgs; git checkout -b build_${_BUILD_GZ_ROS_PKG_TAG} ${_BUILD_GZ_ROS_PKG_TAG} )
+#> ## update dependency (may add gazebo files) and remove gazebo files
+#> RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
+#>     apt update -q -qq && \
+#>     rosdep update -q && \
+#>     rosdep install -q -r -y --from-paths . --ignore-src && \
+#>     apt remove -q -qq -y '.*gazebo.*' '.*sdformat.*' '.*ignition-math.*' '.*ignition-msgs.*' '.*ignition-transport.*' && \
+#>     apt autoremove -y && \
+#>     wget https://raw.githubusercontent.com/ignition-tooling/release-tools/master/jenkins-scripts/lib/dependencies_archive.sh -O /tmp/dependencies.sh && \
+#>     GAZEBO_MAJOR_VERSION=${_BUILD_GAZEBO_VERSION} ROS_DISTRO=${ROS_DISTRO} . /tmp/dependencies.sh && \    
+#>     echo $BASE_DEPENDENCIES $GAZEBO_BASE_DEPENDENCIES | tr -d '\\' | xargs apt -q -qq -y install && \    
+#>     apt clean && \
+#>     rm -rf /var/lib/apt/lists/
+#> 
+#> WORKDIR /gazebo_ros_pkg_ws
+#> RUN source /opt/ros/${ROS_DISTRO}/setup.bash && catkin_make
+
 ## gazebo_ros_pkgs 2.8.7 is latest .deb version of melodic
-RUN git clone https://github.com/ros-simulation/gazebo_ros_pkgs.git && (cd gazebo_ros_pkgs; git checkout -b build_${_BUILD_GZ_ROS_PKG_TAG} ${_BUILD_GZ_ROS_PKG_TAG} )
 ## update dependency (may add gazebo files) and remove gazebo files
-RUN source /opt/ros/${ROS_DISTRO}/setup.bash && \
+#WORKDIR /gazebo_ros_pkg_ws/src
+RUN mkdir -p /gazebo_ros_pkg_ws/src; cd /gazebo_ros_pkg_ws/src && \
+    source /opt/ros/${ROS_DISTRO}/setup.bash && catkin_init_workspace && \
+    git clone https://github.com/ros-simulation/gazebo_ros_pkgs.git && \
+    (cd gazebo_ros_pkgs; git checkout -b build_${_BUILD_GZ_ROS_PKG_TAG} ${_BUILD_GZ_ROS_PKG_TAG} ) && \
+    source /opt/ros/${ROS_DISTRO}/setup.bash && \
     apt update -q -qq && \
     rosdep update -q && \
     rosdep install -q -r -y --from-paths . --ignore-src && \
     apt remove -q -qq -y '.*gazebo.*' '.*sdformat.*' '.*ignition-math.*' '.*ignition-msgs.*' '.*ignition-transport.*' && \
     apt autoremove -y && \
     wget https://raw.githubusercontent.com/ignition-tooling/release-tools/master/jenkins-scripts/lib/dependencies_archive.sh -O /tmp/dependencies.sh && \
-    GAZEBO_MAJOR_VERSION=${_BUILD_GAZEBO_VERSION} ROS_DISTRO=${ROS_DISTRO} . /tmp/dependencies.sh && \    
-    echo $BASE_DEPENDENCIES $GAZEBO_BASE_DEPENDENCIES | tr -d '\\' | xargs apt -q -qq -y install && \    
+    GAZEBO_MAJOR_VERSION=${_BUILD_GAZEBO_VERSION} ROS_DISTRO=${ROS_DISTRO} . /tmp/dependencies.sh && \
+    echo $BASE_DEPENDENCIES $GAZEBO_BASE_DEPENDENCIES | tr -d '\\' | xargs apt -q -qq -y install && \
     apt clean && \
-    rm -rf /var/lib/apt/lists/
-
-ENV LD_LIBRARY_PATH /usr/local/gazebo/lib:${LD_LIBRARY_PATH}
-ENV PATH /usr/local/gazebo/bin:${PATH}
-ENV PKG_CONFIG_PATH /usr/local/gazebo/lib/pkgconfig:${PKG_CONFIG_PATH}
-
-WORKDIR /gazebo_ros_pkg_ws
-RUN source /opt/ros/${ROS_DISTRO}/setup.bash && catkin_make
+    rm -rf /var/lib/apt/lists/ && \
+    cd /gazebo_ros_pkg_ws && source /opt/ros/${ROS_DISTRO}/setup.bash && \
+    catkin_make && catkin_make install && \
+    rm -rf build devel src
