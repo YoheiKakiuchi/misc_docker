@@ -1,7 +1,11 @@
 ##
-## git clone git clone https://gitlab.jsk.imi.i.u-tokyo.ac.jp/rcb4eus/rcb4eus.git
+## git clone https://gitlab.jsk.imi.i.u-tokyo.ac.jp/rcb4eus/rcb4eus.git
+## docker build . -f Dockerfile.rcb4eus --build-arg BASE_IMAGE=jskrobotics/agent_system:gazebo11_dart_2021
 ##
-FROM osrf/ros:melodic-desktop-full
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+##FROM osrf/ros:melodic-desktop-full
 
 SHELL ["/bin/bash", "-c"]
 
@@ -19,4 +23,8 @@ WORKDIR /workdir
 COPY rcb4eus rcb4eus
 
 WORKDIR /workdir/rcb4eus
+## fix for prog/rcb4eus
 RUN source /opt/ros/${ROS_DISTRO}/setup.bash && make
+
+## build robot parts
+RUN source /opt/ros/${ROS_DISTRO}/setup.bash && irteusgl "(progn (load \"rcb4robots.l\") (kxr-make-robot \"kxrl2w2l5a3h2\") (kxr-make-robot \"kxrl2makabels\") (exit))"
