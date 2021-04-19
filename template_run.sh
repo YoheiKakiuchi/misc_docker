@@ -12,6 +12,12 @@ if [ $# -eq 0 -a -z "$OPT" ]; then
     OPT=-it
 fi
 
+if [ "$NO_GPU" = "" ]; then
+    GPU_OPT='--gpus all,"capabilities=compute,graphics,utility,display"'
+else
+    GPU_OPT=""
+fi
+
 ## --net=mynetworkname
 ## docker inspect -f '{{.NetworkSettings.Networks.mynetworkname.IPAddress}}' container_name
 ## docker inspect -f '{{.NetworkSettings.Networks.mynetworkname.Gateway}}'   container_name
@@ -29,7 +35,7 @@ docker rm ${cname}
 
 docker run ${OPT}    \
     --privileged     \
-    --gpus 'all,"capabilities=compute,graphics,utility,display"' \
+    ${GPU_OPT}       \
     ${NET_OPT}       \
     ${DOCKER_ENVIRONMENT_VAR} \
     --env="DISPLAY"  \
