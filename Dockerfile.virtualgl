@@ -34,6 +34,8 @@ ARG BASE_IMAGE
 #> FROM nvidia/opengl:1.1-glvnd-runtime-ubuntu16.04 AS glvnd
 FROM ${BASE_IMAGE}
 
+MAINTAINER YoheiKakiuchi <youhei@jsk.imi.i.u-tokyo.ac.jp>
+
 #> # install glvnd
 #> COPY --from=glvnd /usr/local/lib/x86_64-linux-gnu /usr/local/lib/x86_64-linux-gnu
 #> COPY --from=glvnd /usr/local/lib/i386-linux-gnu /usr/local/lib/i386-linux-gnu
