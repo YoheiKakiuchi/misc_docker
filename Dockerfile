@@ -44,8 +44,9 @@ ARG _BUILD_GAZEBO_TAG=gazebo11_11.0.0
 ARG _BUILD_GZ_ROS_PKG_TAG=2.8.7
 
 SHELL ["/bin/bash", "-c"]
-
 ENV DEBIAN_FRONTEND noninteractive
+
+MAINTAINER YoheiKakiuchi <youhei@jsk.imi.i.u-tokyo.ac.jp>
 
 RUN apt update -q -qq && \
     apt dist-upgrade -q -qq -y && \
