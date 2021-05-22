@@ -1,0 +1,36 @@
+## git clone https://github.com/allanzhao/RoboGrammar.git
+FROM ubuntu:18.04
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND noninteractive
+
+# Install Qt
+###
+
+# Install APT packages
+RUN apt update -q -qq && \
+    apt install -y -q -qq qt5-default qttools5-dev-tools qtdeclarative5-dev \
+                          mesa-common-dev libglu1-mesa-dev libglew-dev lib3ds-dev libeigen3-dev \
+                          libopenctm-dev libgmp-dev libqhull-dev libfuse2 patchelf cmake curl git && \
+    apt install -y -q -qq mesa-common-dev libglu1-mesa-dev libgmp-dev && \
+    apt install -y -q -qq libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev && \
+    apt clean -q -y && \
+    rm -rf /var/lib/apt/lists/
+
+##RUN curl https://codeload.github.com/cnr-isti-vclab/meshlab/tar.gz/refs/tags/Meshlab-2020.12 | tar zx -C /src
+WORKDIR /meshlab
+
+WORKDIR /src
+RUN git clone https://github.com/cnr-isti-vclab/meshlab.git
+
+WORKDIR /src/meshlab
+RUN git checkout -b t_Meshlab-2020.12 Meshlab-2020.12
+RUN git submodule init
+RUN git submodule update
+
+RUN bash scripts/Linux/1_build.sh --double_precision --install_path=/meshlab -j$(nproc)
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/meshlab/usr/lib/meshlab
+ENV PATH $PATH:/meshlab/usr/bin
+
+RUN bash scripts/Linux/2_deploy.sh --install_path=/meshlab
+RUN bash scripts/Linux/3_appimage.sh --install_path=/meshlab
