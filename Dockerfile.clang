@@ -1,0 +1,125 @@
+ARG BASE_IMAGE=ubuntu:20.04
+FROM ${BASE_IMAGE} as builder
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND noninteractive
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
+## libomp-dev
+RUN apt update -q -qq && \
+    apt install -y -q -qq g++  wget make git gcc g++ python3 \
+                          zlib1g-dev libxml2-dev python3-pygments python3-yaml \
+                          libncurses-dev liblzma-dev libedit-dev swig pkg-config python3-dev && \
+    apt clean -q -y && \
+    rm -rf /var/lib/apt/lists/
+
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+WORKDIR /src
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.19.8/cmake-3.19.8-Linux-x86_64.tar.gz
+
+RUN (cd /usr/local; tar xf /src/cmake-3.19.8-Linux-x86_64.tar.gz --strip-components=1)
+
+RUN wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.0.tar.gz
+
+RUN tar xf llvmorg-12.0.0.tar.gz
+
+ARG CLANG_BUILD_MODULES="clang;clang-tools-extra;compiler-rt;debuginfo-tests;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl"
+#ARG CLANG_BUILD_MODULES="clang;clang-tools-extra;compiler-rt;debuginfo-tests;libc;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl"
+#ARG CLANG_BUILD_MODULES="clang;clang-tools-extra;lld;polly;compiler-rt;openmp;libcxx;libcxxabi;lldb"
+#ARG CLANG_BUILD_MODULES="clang;clang-tools-extra"
+## projects: clang, clang-tools-extra, libcxx, libcxxabi, libunwind, lldb, compiler-rt, lld, polly, debuginfo-tests
+
+WORKDIR /build
+ENV CC=gcc
+ENV CXX=g++
+RUN cmake -DCMAKE_INSTALL_PREFIX=/opt/llvm \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
+    -DCLANG_PYTHON_BINDINGS_VERSIONS="3.8" \
+    -G "Unix Makefiles" \
+    -DPython3_EXECUTABLE=/usr/bin/python3 \
+    -DLLVM_ENABLE_PIC=ON \
+    -DLLDB_ENABLE_PYTHON=ON \
+    -DCMAKE_C_COMPILER="${CC}" \
+    -DCMAKE_CXX_COMPILER="${CXX}" \
+    /src/llvm-project-llvmorg-12.0.0/llvm
+
+RUN make -j$(nproc)
+RUN make install
+
+## second build
+ENV PATH=/opt/llvm/bin:$PATH
+ENV LD_LIBRARY_PATH=/opt/llvm/lib:$LD_LIBRARY_PATH
+ENV CC=clang
+ENV CXX=clang++
+ENV CFLAGS='-O3'
+ENV CXXFLAGS='-O3'
+#ENV CFLAGS='-O3 -march=broadwell'
+#ENV CXXFLAGS='-stdlib=libc++ -O3 -march=broadwell'
+
+WORKDIR /build_2nd
+RUN cmake -DCMAKE_INSTALL_PREFIX=/opt/llvm \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;libcxx;libcxxabi;openmp;parallel-libs;polly;pstl" \
+    -DCLANG_PYTHON_BINDINGS_VERSIONS="3.8" \
+    -G "Unix Makefiles" \
+    -DPython3_EXECUTABLE=/usr/bin/python3 \
+    -DLLVM_ENABLE_PIC=ON \
+    -DLLVM_ENABLE_LIBCXX=ON \
+    -DLLDB_ENABLE_PYTHON=ON \
+    -DCMAKE_C_COMPILER="${CC}" \
+    -DCMAKE_CXX_COMPILER="${CXX}" \    
+    /src/llvm-project-llvmorg-12.0.0/llvm
+
+RUN make -j$(nproc)
+RUN make install
+
+ENV CFLAGS='-O3'
+ENV CXXFLAGS='-stdlib=libc++ -O3'
+WORKDIR /build_3rd
+RUN cmake -DCMAKE_INSTALL_PREFIX=/opt/llvm \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_ENABLE_PROJECTS=${CLANG_BUILD_MODULES} \
+    -DCLANG_PYTHON_BINDINGS_VERSIONS="3.8" \
+    -G "Unix Makefiles" \
+    -DPython3_EXECUTABLE=/usr/bin/python3 \
+    -DLLVM_ENABLE_PIC=ON \
+    -DLLVM_ENABLE_LIBCXX=ON \
+    -DLLDB_ENABLE_PYTHON=ON \
+    -DCMAKE_C_COMPILER="${CC}" \
+    -DCMAKE_CXX_COMPILER="${CXX}" \
+    /src/llvm-project-llvmorg-12.0.0/llvm
+
+RUN make -j$(nproc)
+RUN make install
+
+## final stage
+FROM ${BASE_IMAGE}
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND noninteractive
+
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+ENV TZ=Asia/Tokyo
+
+RUN apt update -q -qq && \
+    apt install -y -q -qq tzdata && \
+    apt install -y -q -qq g++  wget make gcc g++ python3 \
+                               zlib1g-dev libxml2-dev python3-pygments python3-yaml \
+                               libncurses-dev liblzma-dev libedit-dev swig pkg-config && \
+apt clean -q -y && \
+    rm -rf /var/lib/apt/lists/
+
+ENV PATH=/opt/llvm/bin:$PATH
+ENV LD_LIBRARY_PATH=/opt/llvm/lib:$LD_LIBRARY_PATH
+ENV CC=clang
+ENV CXX=clang++
+#ENV CFLAGS='-O3'
+#ENV CXXFLAGS='-O3'
+ENV CFLAGS='-O3'
+ENV CXXFLAGS='-stdlib=libc++ -O3'
+
+COPY --from=builder /opt/llvm/ opt/llvm

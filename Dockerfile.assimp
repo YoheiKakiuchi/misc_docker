@@ -3,22 +3,42 @@ FROM ${BASE_IMAGE} as builder
 
 SHELL ["/bin/bash", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
 
 # Install APT packages
 RUN apt update -q -qq && \
-    apt install -y -q -qq g++ cmake curl git && \
+    apt install -y -q -qq cmake curl git g++ && \
     apt clean -q -y && \
     rm -rf /var/lib/apt/lists/
 
-WORKDIR /assimp_build
-RUN git clone https://github.com/assimp/assimp.git
+ARG ROOT_DIR=/assimp_build
+ARG SRC_DIR=assimp
+ARG BUILD_DIR=build
 
-WORKDIR /assimp_build/assimp/build
-RUN cmake -DCMAKE_INSTALL_PREFIX=/opt/assimp -DCMAKE_BUILD_TYPE=Release -DASSIMP_DOUBLE_PRECISION=ON ..
+ARG TAG_FOR_BUILD=v5.0.1
+WORKDIR ${ROOT_DIR}
+RUN git clone https://github.com/assimp/assimp.git ${SRC_DIR}
+RUN (cd ${SRC_DIR}; git checkout -b check_tag ${TAG_FOR_BUILD})
+
+WORKDIR ${ROOT_DIR}/${BUILD_DIR}
+RUN cmake -DCMAKE_INSTALL_PREFIX=/opt/assimp -DCMAKE_BUILD_TYPE=Release -DASSIMP_DOUBLE_PRECISION=ON ${ROOT_DIR}/${SRC_DIR}
 RUN make -j$(nproc)
 RUN make install
 
 ## final stage
 FROM ${BASE_IMAGE}
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND noninteractive
+
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+ENV TZ=Asia/Tokyo
+
+RUN apt update -q -qq && \
+    apt install -y -q -qq tzdata && \
+    apt clean -q -y && \
+    rm -rf /var/lib/apt/lists/
 
 COPY --from=builder /opt/assimp/ /opt/assimp
