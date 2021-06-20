@@ -140,6 +140,7 @@ RUN mkdir -p /gazebo_ros_pkg_ws/src; cd /gazebo_ros_pkg_ws/src && \
     apt update -q -qq && \
     rosdep update -q && \
     rosdep install -q -r -y --from-paths . --ignore-src --skip-keys=gazebo9 --skip-keys=libgazebo9-dev && \
+    apt install ros-${ROS_DISTRO}-robot-state-publisher ros-${ROS_DISTRO}-joint-state-controller && \
     apt clean && rm -rf /var/lib/apt/lists/ && \
     cd /gazebo_ros_pkg_ws && \
     if [ "${ROS_SOURCE}" = "" ]; then source /opt/ros/${ROS_DISTRO}/setup.bash; else source ${ROS_SOURCE}; fi && \
