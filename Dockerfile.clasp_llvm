@@ -1,6 +1,7 @@
 # docker run -it --privileged --cap-add=SYS_PTRACE --security-opt="seccomp=unconfined" clasptest bash
 # docker run -it --privileged --cap-add=ALL --security-opt="seccomp=unconfined" clasptest bash
-FROM ubuntu:20.04
+#FROM ubuntu:20.04
+FROM clang-13:20.04
 
 SHELL ["/bin/bash", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
@@ -10,7 +11,7 @@ ENV LC_ALL C.UTF-8
 RUN apt update -q -qq && \
     apt install -y -q -qq tzdata
 
-# install all clasp build deps: mostly clang, boost
+# install all clasp build deps: boost
 
 RUN apt-get -q -qq update && apt-get install -y -q -qq \
   software-properties-common wget curl \
@@ -20,10 +21,9 @@ RUN apt-get -q -qq update && apt-get install -y -q -qq \
   zlib1g-dev libncurses-dev libboost-filesystem-dev libboost-regex-dev \
   libboost-date-time-dev libboost-program-options-dev libboost-system-dev \
   libboost-iostreams-dev csh flex gfortran zlib1g-dev libbz2-dev patch \
-  git libexpat-dev wget vim libzmq3-dev libelf-dev libbsd-dev
-#  gcc g++
+  git libexpat-dev wget vim libzmq3-dev libelf-dev libbsd-dev libffi-dev
+# gcc g++
 # llvm clang sbcl
-#apt install 
 
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
@@ -33,15 +33,6 @@ RUN wget https://jaist.dl.sourceforge.net/project/sbcl/sbcl/2.1.5/sbcl-2.1.5-x86
 RUN tar xf sbcl-2.1.5-x86-64-linux-binary.tar.bz2
 RUN (cd sbcl-2.1.5-x86-64-linux && sh install.sh)
 
-ARG LLVM_V=12
-RUN wget https://apt.llvm.org/llvm.sh && chmod a+x llvm.sh && ./llvm.sh ${LLVM_V}
-RUN apt install -q -y libllvm${LLVM_V} llvm-${LLVM_V} llvm-${LLVM_V}-dev llvm-${LLVM_V}-runtime \
-    clang-${LLVM_V} clang-tools-${LLVM_V} libclang-common-${LLVM_V}-dev libclang-${LLVM_V}-dev \
-    libclang1-${LLVM_V} clang-format-${LLVM_V} clangd-${LLVM_V} \
-    lldb-${LLVM_V} lld-${LLVM_V} libc++-${LLVM_V}-dev libc++abi-${LLVM_V}-dev \
-    python3-clang-${LLVM_V}
-ENV CC=/usr/bin/clang-${LLVM_V} CXX="/usr/bin/clang++-${LLVM_V} -stdlib=libc++"
-
 ADD . clasp
 # RUN git clone --depth=1 https://github.com/clasp-developers/clasp.git clasp
 
@@ -50,16 +41,15 @@ WORKDIR /claspbuild/clasp
 RUN rm -rf build/* && mkdir -p /opt/clasp
 
 # checkout submodules, configure, and build
-RUN echo "LLVM_CONFIG_BINARY='/usr/bin/llvm-config-${LLVM_V}'" > wscript.config
-RUN echo "LLVM_VERSION_OVERRIDE=${LLVM_V}" >> wscript.config
+RUN echo "LLVM_CONFIG_BINARY='/opt/llvm/bin/llvm-config'" > wscript.config
 RUN echo "PREFIX='/opt/clasp'" >> wscript.config
 # RUN echo "CLASP_VERSION='clasp_docker'" >> wscript.config
 RUN echo "USE_PARALLEL_BUILD = True" >> wscript.config
-#RUN echo "USE_LLD = True" >> wscript.config
-RUN echo "USE_LLD = False" >> wscript.config
+RUN echo "USE_LLD = True" >> wscript.config
+# RUN echo "USE_LLD = False" >> wscript.config
 RUN echo "CLASP_BUILD_MODE = 'object'" >> wscript.config
-RUN echo 'DEBUG_OPTIONS = [ "DEBUG_CCLASP_LISP", "DEBUG_VERIFY_MODULES", "DEBUG_ASSERT_TYPE_CAST", "DEBUG_JIT_LOG_SYMBOLS" ]' >> wscript.config
 # RUN echo "CLASP_BUILD_MODE = 'bitcode'" >> wscript.config
+RUN echo 'DEBUG_OPTIONS = [ "DEBUG_CCLASP_LISP", "DEBUG_VERIFY_MODULES", "DEBUG_ASSERT_TYPE_CAST", "DEBUG_JIT_LOG_SYMBOLS" ]' >> wscript.config
 
 # RUN git clone --depth=1 https://github.com/quicklisp/quicklisp-client.git $HOME/quicklisp
 # RUN mkdir $HOME/quicklisp/local-projects
@@ -75,8 +65,8 @@ RUN echo 'DEBUG_OPTIONS = [ "DEBUG_CCLASP_LISP", "DEBUG_VERIFY_MODULES", "DEBUG_
 RUN ./waf configure
 #RUN ./waf -j $(nproc) build_iboehm_d
 #RUN ./waf -j $(nproc) build_aboehm_d
-#RUN ./waf -j $(nproc) build_iboehm
-RUN ./waf -v -j 1 build_iboehm
+#RUN ./waf -v -j 1 build_iboehm
+RUN ./waf -j $(nproc) build_iboehm
 RUN ./waf -j $(nproc) build_aboehm
 RUN ./waf -j $(nproc) build_bboehm
 RUN ./waf -j $(nproc) build_cboehm
