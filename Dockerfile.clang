@@ -8,7 +8,7 @@ ENV LC_ALL C.UTF-8
 
 ## libomp-dev
 RUN apt update -q -qq && \
-    apt install -y -q -qq g++  wget make git gcc g++ python3 \
+    apt install -y -q -qq g++  wget make git gcc g++ python3 libffi-dev \
                           zlib1g-dev libxml2-dev python3-pygments python3-yaml \
                           libncurses-dev liblzma-dev libedit-dev swig pkg-config python3-dev && \
     apt clean -q -y && \
@@ -21,11 +21,15 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.19.8/cmake-3.19.8
 
 RUN (cd /usr/local; tar xf /src/cmake-3.19.8-Linux-x86_64.tar.gz --strip-components=1)
 
-RUN wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.0.tar.gz
+#RUN wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.0.tar.gz
+#RUN tar xf llvmorg-12.0.0.tar.gz
+#ARG LLVM_SRC_DIR=/src/llvm-project-llvmorg-12.0.0/llvm
+COPY llvm-project llvm-project
+RUN ( cd llvm-project && git checkout -b 13.0.0git 972b6a3a3471c2a742c5c5d8ec004ff640d544c4 )
+ARG LLVM_SRC_DIR=/src/llvm-project/llvm
 
-RUN tar xf llvmorg-12.0.0.tar.gz
-
-ARG CLANG_BUILD_MODULES="clang;clang-tools-extra;compiler-rt;debuginfo-tests;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl"
+ARG CLANG_BUILD_MODULES="clang;clang-tools-extra;compiler-rt;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl"
+#ARG CLANG_BUILD_MODULES="clang;clang-tools-extra;compiler-rt;debuginfo-tests;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl"
 #ARG CLANG_BUILD_MODULES="clang;clang-tools-extra;compiler-rt;debuginfo-tests;libc;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl"
 #ARG CLANG_BUILD_MODULES="clang;clang-tools-extra;lld;polly;compiler-rt;openmp;libcxx;libcxxabi;lldb"
 #ARG CLANG_BUILD_MODULES="clang;clang-tools-extra"
@@ -41,10 +45,11 @@ RUN cmake -DCMAKE_INSTALL_PREFIX=/opt/llvm \
     -G "Unix Makefiles" \
     -DPython3_EXECUTABLE=/usr/bin/python3 \
     -DLLVM_ENABLE_PIC=ON \
+    -DLLVM_ENABLE_FFI=ON \
     -DLLDB_ENABLE_PYTHON=ON \
     -DCMAKE_C_COMPILER="${CC}" \
     -DCMAKE_CXX_COMPILER="${CXX}" \
-    /src/llvm-project-llvmorg-12.0.0/llvm
+    ${LLVM_SRC_DIR}
 
 RUN make -j$(nproc)
 RUN make install
@@ -62,16 +67,17 @@ ENV CXXFLAGS='-O3'
 WORKDIR /build_2nd
 RUN cmake -DCMAKE_INSTALL_PREFIX=/opt/llvm \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;libcxx;libcxxabi;openmp;parallel-libs;polly;pstl" \
+    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;libcxx;libcxxabi;openmp;parallel-libs;polly;pstl;lld" \
     -DCLANG_PYTHON_BINDINGS_VERSIONS="3.8" \
     -G "Unix Makefiles" \
     -DPython3_EXECUTABLE=/usr/bin/python3 \
     -DLLVM_ENABLE_PIC=ON \
+    -DLLVM_ENABLE_FFI=ON \
     -DLLVM_ENABLE_LIBCXX=ON \
     -DLLDB_ENABLE_PYTHON=ON \
     -DCMAKE_C_COMPILER="${CC}" \
-    -DCMAKE_CXX_COMPILER="${CXX}" \    
-    /src/llvm-project-llvmorg-12.0.0/llvm
+    -DCMAKE_CXX_COMPILER="${CXX}" \
+     ${LLVM_SRC_DIR}
 
 RUN make -j$(nproc)
 RUN make install
@@ -86,11 +92,13 @@ RUN cmake -DCMAKE_INSTALL_PREFIX=/opt/llvm \
     -G "Unix Makefiles" \
     -DPython3_EXECUTABLE=/usr/bin/python3 \
     -DLLVM_ENABLE_PIC=ON \
+    -DLLVM_ENABLE_FFI=ON \
     -DLLVM_ENABLE_LIBCXX=ON \
+    -DLLVM_ENABLE_LLD=ON \
     -DLLDB_ENABLE_PYTHON=ON \
     -DCMAKE_C_COMPILER="${CC}" \
     -DCMAKE_CXX_COMPILER="${CXX}" \
-    /src/llvm-project-llvmorg-12.0.0/llvm
+    ${LLVM_SRC_DIR}
 
 RUN make -j$(nproc)
 RUN make install
@@ -107,7 +115,7 @@ ENV TZ=Asia/Tokyo
 
 RUN apt update -q -qq && \
     apt install -y -q -qq tzdata && \
-    apt install -y -q -qq g++  wget make gcc g++ python3 \
+    apt install -y -q -qq g++  wget make gcc g++ python3 libffi-dev \
                                zlib1g-dev libxml2-dev python3-pygments python3-yaml \
                                libncurses-dev liblzma-dev libedit-dev swig pkg-config && \
 apt clean -q -y && \
