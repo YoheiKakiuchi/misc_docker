@@ -24,7 +24,6 @@ RUN (cd /usr/local; tar xf /src/cmake-3.19.8-Linux-x86_64.tar.gz --strip-compone
 #RUN wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.0.tar.gz
 #RUN tar xf llvmorg-12.0.0.tar.gz
 #ARG LLVM_SRC_DIR=/src/llvm-project-llvmorg-12.0.0/llvm
-
 COPY llvm-project llvm-project
 RUN ( cd llvm-project && git checkout -b 13.0.0git 972b6a3a3471c2a742c5c5d8ec004ff640d544c4 )
 ARG LLVM_SRC_DIR=/src/llvm-project/llvm
@@ -39,89 +38,59 @@ ARG CLANG_BUILD_MODULES="clang;clang-tools-extra;compiler-rt;libclc;libcxx;libcx
 WORKDIR /build
 ENV CC=gcc
 ENV CXX=g++
-RUN cmake -DCMAKE_INSTALL_PREFIX=/opt/llvm \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
-    -DCLANG_PYTHON_BINDINGS_VERSIONS="3.8" \
-    -G "Unix Makefiles" \
-    -DPython3_EXECUTABLE=/usr/bin/python3 \
-    -DLLVM_ENABLE_PIC=ON \
-    -DLLVM_ENABLE_FFI=ON \
-    -DLLDB_ENABLE_PYTHON=ON \
-    -DCMAKE_C_COMPILER="${CC}" \
-    -DCMAKE_CXX_COMPILER="${CXX}" \
-    ${LLVM_SRC_DIR}
+RUN cmake -G "Unix Makefiles" \
+  -DLLVM_ABI_BREAKING_CHECKS=FORCE_OFF \
+  -DLINK_POLLY_INTO_TOOLS=ON \
+  -DLLVM_BUILD_EXTERNAL_COMPILER_RT=ON \
+  -DLLVM_BUILD_LLVM_DYLIB=ON \
+  -DLLVM_ENABLE_ASSERTIONS=OFF \
+  -DLLVM_ENABLE_EH=ON \
+  -DLLVM_ENABLE_FFI=ON \
+  -DLLVM_ENABLE_LIBCXX=ON \
+  -DLLVM_ENABLE_RTTI=ON \
+  -DLLVM_INCLUDE_DOCS=OFF \
+  -DLLVM_INSTALL_UTILS=ON \
+  -DLLVM_OPTIMIZED_TABLEGEN=ON \
+  -DLLVM_TARGETS_TO_BUILD=X86 \
+  -DLLVM_ENABLE_PROJECTS="clang;libcxxabi;libcxx" \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DWITH_POLLY=ON \
+  -DCMAKE_INSTALL_PREFIX=/opt/llvm \
+  -DLLVM_CREATE_XCODE_TOOLCHAIN=ON \
+  -DCLANG_PYTHON_BINDINGS_VERSIONS="3.8" \
+  -DPython3_EXECUTABLE=/usr/bin/python3 \
+  -DLLDB_ENABLE_PYTHON=ON \
+  ${LLVM_SRC_DIR}
 
-RUN make -j$(nproc) && make install
 
-## second build
-ENV PATH=/opt/llvm/bin:$PATH
-ENV LD_LIBRARY_PATH=/opt/llvm/lib:$LD_LIBRARY_PATH
-ENV CC=clang
-ENV CXX=clang++
-
-WORKDIR /build_2nd
-RUN cmake -DCMAKE_INSTALL_PREFIX=/opt/llvm \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;libcxx;libcxxabi;openmp;parallel-libs;polly;pstl;lld" \
-    -DCLANG_PYTHON_BINDINGS_VERSIONS="3.8" \
-    -G "Unix Makefiles" \
-    -DPython3_EXECUTABLE=/usr/bin/python3 \
-    -DLLVM_ENABLE_PIC=ON \
-    -DLLVM_ENABLE_FFI=ON \
-    -DLLDB_ENABLE_PYTHON=ON \
-    -DCMAKE_C_COMPILER="${CC}" \
-    -DCMAKE_CXX_COMPILER="${CXX}" \
-     ${LLVM_SRC_DIR}
-
-RUN make -j$(nproc) && make install
-
-#ENV CFLAGS='-O3'
-ENV CXXFLAGS='-stdlib=libc++'
-WORKDIR /build_3rd
-RUN cmake -DCMAKE_INSTALL_PREFIX=/opt/llvm \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DLLVM_ENABLE_PROJECTS=${CLANG_BUILD_MODULES} \
-    -DCLANG_PYTHON_BINDINGS_VERSIONS="3.8" \
-    -G "Unix Makefiles" \
-    -DPython3_EXECUTABLE=/usr/bin/python3 \
-    -DLLVM_ENABLE_PIC=ON \
-    -DLLVM_ENABLE_FFI=ON \
-    -DLLDB_ENABLE_PYTHON=ON \
-    -DLLVM_ENABLE_LLD=ON \
-    -DLLVM_ENABLE_LIBCXX=ON \
-    -DCMAKE_C_COMPILER="${CC}" \
-    -DCMAKE_CXX_COMPILER="${CXX}" \
- -DLINK_POLLY_INTO_TOOLS=ON \
- -DWITH_POLLY=ON \  
- -DLLVM_ABI_BREAKING_CHECKS=FORCE_OFF \
- -DLLVM_BUILD_EXTERNAL_COMPILER_RT=ON \
- -DLLVM_ENABLE_ASSERTIONS=OFF \
- -DLLVM_ENABLE_EH=ON \
- -DLLVM_ENABLE_RTTI=ON \
- -DLLVM_INSTALL_UTILS=ON \
- -DLLVM_OPTIMIZED_TABLEGEN=ON \
- -DLLVM_TARGETS_TO_BUILD=X86 \
- -DLLVM_BUILD_LLVM_DYLIB=ON \    
-    ${LLVM_SRC_DIR}
-#    -DBUILD_SHARED_LIBS=ON \
-  
-RUN make -j$(nproc) && make install
+RUN make -j$(nproc)
+RUN make install
 
 ## final stage
 FROM ${BASE_IMAGE}
 
 SHELL ["/bin/bash", "-c"]
-ENV DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=Asia/Tokyo
+ENV DEBIAN_FRONTEND noninteractive
+
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+ENV TZ=Asia/Tokyo
 
 RUN apt update -q -qq && \
     apt install -y -q -qq tzdata && \
     apt install -y -q -qq g++  wget make gcc g++ python3 libffi-dev \
                                zlib1g-dev libxml2-dev python3-pygments python3-yaml \
                                libncurses-dev liblzma-dev libedit-dev swig pkg-config && \
-    apt clean -q -y && \
+apt clean -q -y && \
     rm -rf /var/lib/apt/lists/
 
-ENV CC=clang CXX=clang++ PATH=/opt/llvm/bin:$PATH LD_LIBRARY_PATH=/opt/llvm/lib:$LD_LIBRARY_PATH
+ENV PATH=/opt/llvm/bin:$PATH
+ENV LD_LIBRARY_PATH=/opt/llvm/lib:$LD_LIBRARY_PATH
+ENV CC=clang
+ENV CXX=clang++
+#ENV CFLAGS='-O3'
+#ENV CXXFLAGS='-O3'
+#ENV CFLAGS='-O3'
+#ENV CXXFLAGS='-stdlib=libc++ -O3'
 
 COPY --from=builder /opt/llvm/ opt/llvm

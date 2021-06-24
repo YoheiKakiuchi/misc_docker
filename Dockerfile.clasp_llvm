@@ -1,7 +1,8 @@
 # docker run -it --privileged --cap-add=SYS_PTRACE --security-opt="seccomp=unconfined" clasptest bash
 # docker run -it --privileged --cap-add=ALL --security-opt="seccomp=unconfined" clasptest bash
 #FROM ubuntu:20.04
-FROM clang-13:20.04
+#FROM clang-13:20.04
+FROM clang:for_clasp
 
 SHELL ["/bin/bash", "-c"]
 ENV DEBIAN_FRONTEND noninteractive
@@ -47,9 +48,11 @@ RUN echo "PREFIX='/opt/clasp'" >> wscript.config
 RUN echo "USE_PARALLEL_BUILD = True" >> wscript.config
 RUN echo "USE_LLD = True" >> wscript.config
 # RUN echo "USE_LLD = False" >> wscript.config
-RUN echo "CLASP_BUILD_MODE = 'object'" >> wscript.config
+# RUN echo "CLASP_BUILD_MODE = 'object'" >> wscript.config
 # RUN echo "CLASP_BUILD_MODE = 'bitcode'" >> wscript.config
 RUN echo 'DEBUG_OPTIONS = [ "DEBUG_CCLASP_LISP", "DEBUG_VERIFY_MODULES", "DEBUG_ASSERT_TYPE_CAST", "DEBUG_JIT_LOG_SYMBOLS" ]' >> wscript.config
+#RUN echo 'DEBUG_OPTIONS = [ "DEBUG_CCLASP_LISP", "DEBUG_VERIFY_MODULES", "DEBUG_ASSERT_TYPE_CAST", "DEBUG_JIT_LOG_SYMBOLS", "DEBUG_RELEASE", "DEBUG_BCLASP_LISP", "DEBUG_COMPILER", "DEBUG_SLOW" ]' >> wscript.config
+RUN echo "LINKFLAGS= ['-lboost_date_time']" >> wscript.config
 
 # RUN git clone --depth=1 https://github.com/quicklisp/quicklisp-client.git $HOME/quicklisp
 # RUN mkdir $HOME/quicklisp/local-projects
@@ -61,6 +64,9 @@ RUN echo 'DEBUG_OPTIONS = [ "DEBUG_CCLASP_LISP", "DEBUG_VERIFY_MODULES", "DEBUG_
 # && git clone --depth=1 https://github.com/clasp-developers/cl-bqplot.git \
 # && git clone --depth=1 https://github.com/clasp-developers/uuid.git \
 # && git clone --depth=1 https://github.com/clasp-developers/bordeaux-threads.git
+
+ENV CFLAGS=
+ENV CXXFLAGS=
 
 RUN ./waf configure
 #RUN ./waf -j $(nproc) build_iboehm_d
