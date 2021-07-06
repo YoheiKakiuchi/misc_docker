@@ -9,6 +9,8 @@ RUN apt update -q -qq -y && \
     apt clean && \
     rm -rf /var/lib/apt/lists/
 
+## https://nodejs.org/ja/download/  #  node-v14.17.3-linux-x64.tar.xz
+## https://code.visualstudio.com/download # code_1.57.1-1623937013_amd64.deb
 COPY code_1.57.1-1623937013_amd64.deb /tmp
 COPY node-v14.17.3-linux-x64.tar.xz   /tmp
 
