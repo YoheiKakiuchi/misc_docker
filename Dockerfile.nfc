@@ -1,0 +1,32 @@
+ARG BASE_IMAGE=ubuntu:20.04
+FROM ${BASE_IMAGE}
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=Asia/Tokyo
+
+RUN apt update -q -qq && \
+    apt install -y -q -qq tzdata && \
+    apt clean -q -y && \
+    rm -rf /var/lib/apt/lists/
+
+RUN apt update -q -qq && \
+    apt install -y -q -qq g++  wget make git gcc curl \
+                          pcsc-tools pcscd libpcsclite-dev \
+                          automake autoconf-archive libtool libusb-1.0-0-dev \
+                          && \
+    apt clean -q -y && \
+    rm -rf /var/lib/apt/lists/
+
+WORKDIR /src
+RUN curl https://ccid.apdu.fr/files/ccid-1.4.35.tar.bz2 | tar jxf -
+WORKDIR /src/
+
+RUN cd ccid-1.4.35 && \
+    ./bootstrap && \
+    ./configure && \
+    make && make install
+
+## cp src/92_pcscd_ccid.rules /etc/udev/rules.d
+## docker run --privileged -v $(pwd):/src -it testtest bash
+## gcc test_pcsc.c $(pkg-config --cflags libpcsclite) $(pkg-config --libs libpcsclite)
+##
