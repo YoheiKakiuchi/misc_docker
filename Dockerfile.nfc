@@ -1,4 +1,7 @@
-ARG BASE_IMAGE=ubuntu:20.04
+#ARG BASE_IMAGE=ubuntu:20.04
+#ARG BASE_IMAGE=ubuntu:18.04
+#ARG BASE_IMAGE=osrf/ros:melodic-desktop-full
+ARG BASE_IMAGE=jskrobotics/agent_system:ros_melodic_2021
 FROM ${BASE_IMAGE}
 
 SHELL ["/bin/bash", "-c"]
@@ -10,7 +13,7 @@ RUN apt update -q -qq && \
     rm -rf /var/lib/apt/lists/
 
 RUN apt update -q -qq && \
-    apt install -y -q -qq g++  wget make git gcc curl \
+    apt install -y -q -qq g++  wget make git gcc curl pkg-config \
                           pcsc-tools pcscd libpcsclite-dev \
                           automake autoconf-archive libtool libusb-1.0-0-dev \
                           && \
@@ -26,7 +29,20 @@ RUN cd ccid-1.4.35 && \
     ./configure && \
     make && make install
 
-## cp src/92_pcscd_ccid.rules /etc/udev/rules.d
-## docker run --privileged -v $(pwd):/src -it testtest bash
-## gcc test_pcsc.c $(pkg-config --cflags libpcsclite) $(pkg-config --libs libpcsclite)
-##
+## for ROS/euslisp environment
+RUN apt update -q -qq && \
+    apt install -y -q -qq ros-${ROS_DISTRO}-roseus ros-${ROS_DISTRO}-pr2eus && \
+    apt clean -q -y && \
+    rm -rf /var/lib/apt/lists/
+
+WORKDIR /ros_node
+COPY pcsclib.cpp .
+COPY pcsclib.l .
+COPY pcsc-node.l .
+
+RUN g++ -o pcsclib_for_eus.so -fPIC --shared pcsclib.cpp $(pkg-config --cflags libpcsclite) $(pkg-config --libs libpcsclite)
+
+CMD ["bash", "-c", "source /opt/ros/melodic/setup.bash; pcscd; sleep 3; roseus pcsc-node.l"]
+
+## docker build -f Dockerfile.nfc -t nfc18.04 .
+## docker run --net=host --privileged -it nfc18.04
