@@ -1,0 +1,51 @@
+#FROM ubuntu:18.04
+FROM nvidia/opengl:1.2-glvnd-runtime-ubuntu18.04
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=Asia/Tokyo
+
+# docker run -it nvidia/opengl:1.2-glvnd-runtime-ubuntu18.04 bash
+## git wget unzip
+## python3 python3-pip
+
+# Install APT packages
+RUN apt update -q -qq && \
+    apt install -y -q -qq git wget unzip python3 python3-pip && \
+    apt install -y -q -qq libopencv-dev ffmpeg mesa-utils && \    
+    apt upgrade -q -qq -y
+
+WORKDIR /src
+RUN git clone https://github.com/xavierpuigf/virtualhome.git
+
+# WORKDIR /src/virtualhome
+# RUN git checkout -b tagv2.2.0 v2.2.0
+# RUN pip3 install -r requirements.txt
+# RUN pip3 install notebook matplotlib
+# RUN pip3 install urllib3==1.24.0
+
+### for AIST
+WORKDIR /src/virtualhome
+RUN git remote add aist https://github.com/aistairc/VirtualHome2KG.git && git fetch aist && git checkout -b aist aist/main
+RUN pip3 install -r requirements.txt
+RUN pip3 install notebook matplotlib rdflib
+RUN pip3 install urllib3==1.24.0
+## wget http://virtual-home.org/release/programs/programs_processed_precond_nograb_morepreconds.zip
+COPY programs_processed_precond_nograb_morepreconds.zip .
+RUN unzip -qq programs_processed_precond_nograb_morepreconds.zip -d dataset; rm programs_processed_precond_nograb_morepreconds.zip
+### (END) for AIST
+
+### https://github.com/xavierpuigf/virtualhome/
+### xxx http://virtual-home.org/release/simulator/last_release/linux_exec.zip
+### RUN wget http://virtual-home.org/release/simulator/last_release/linux_exec.zip
+### OK: https://github.com/xavierpuigf/virtualhome/releases/download/v2.0.0/linux_exec.zip
+### RUN wget https://github.com/xavierpuigf/virtualhome/releases/download/v2.0.0/linux_exec.zip
+COPY linux_exec.zip .
+RUN cd /src/virtualhome/simulation/unity_simulator; unzip -qq /src/virtualhome/linux_exec.zip; rm /src/virtualhome/linux_exec.zip
+
+## docker build -f Dockerfile.virtualhome -t test_vh .
+## DOCKER_IMAGE=test_vh ./run.sh
+## DOCKER_IMAGE=test_aist_vh ./run.sh
+## /src/virtualhome/simulation/unity_simulator/linux_exec.v2.2.4.x86_64 -screen-fullscreen 0 -screen-quality 4
+## /src/virtualhome/simulation/unity_simulator/linux_exec.x86_64 -screen-fullscreen 0 -screen-quality 4
+## cd /src/virtualhome/demo; jupyter-notebook --allow-root
+## cd /src/virtualhome/demo; cp /userdir/demo_vh.py . ; python3 demo_vh.py
