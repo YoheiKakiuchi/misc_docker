@@ -6,11 +6,14 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 
-## libomp-dev
+# libomp-dev
+# llvm-10-dev libomp-10-dev
+# clang-11 libc++-11-dev
 RUN apt update -q -qq && \
     apt install -y -q -qq g++  wget make git gcc g++ python3 libffi-dev \
                           zlib1g-dev libxml2-dev python3-pygments python3-yaml \
                           libncurses-dev liblzma-dev libedit-dev swig pkg-config python3-dev && \
+    apt install -y -q -qq clang-11 libc++-11-dev && \
     apt clean -q -y && \
     rm -rf /var/lib/apt/lists/
 
@@ -25,7 +28,8 @@ RUN (cd /usr/local; tar xf /src/cmake-3.19.8-Linux-x86_64.tar.gz --strip-compone
 #RUN tar xf llvmorg-12.0.0.tar.gz
 #ARG LLVM_SRC_DIR=/src/llvm-project-llvmorg-12.0.0/llvm
 COPY llvm-project llvm-project
-RUN ( cd llvm-project && git checkout -b 13.0.0git 972b6a3a3471c2a742c5c5d8ec004ff640d544c4 )
+#RUN ( cd llvm-project && git checkout -b 13.0.0git 972b6a3a3471c2a742c5c5d8ec004ff640d544c4 )
+RUN ( cd llvm-project && git checkout -b v13.0.0 llvmorg-13.0.0)
 ARG LLVM_SRC_DIR=/src/llvm-project/llvm
 
 ARG CLANG_BUILD_MODULES="clang;clang-tools-extra;compiler-rt;libclc;libcxx;libcxxabi;libunwind;lld;lldb;mlir;openmp;parallel-libs;polly;pstl"
@@ -36,9 +40,9 @@ ARG CLANG_BUILD_MODULES="clang;clang-tools-extra;compiler-rt;libclc;libcxx;libcx
 ## projects: clang, clang-tools-extra, libcxx, libcxxabi, libunwind, lldb, compiler-rt, lld, polly, debuginfo-tests
 
 WORKDIR /build
-ENV CC=gcc
-ENV CXX=g++
-RUN cmake -G "Unix Makefiles" \
+#ENV CC=gcc CXX=g++
+ENV CC=clang-11 CXX=clang++-11
+RUN cmake -S llvm -G "Unix Makefiles" \
   -DLLVM_ABI_BREAKING_CHECKS=FORCE_OFF \
   -DLINK_POLLY_INTO_TOOLS=ON \
   -DLLVM_BUILD_EXTERNAL_COMPILER_RT=ON \
@@ -52,7 +56,7 @@ RUN cmake -G "Unix Makefiles" \
   -DLLVM_INSTALL_UTILS=ON \
   -DLLVM_OPTIMIZED_TABLEGEN=ON \
   -DLLVM_TARGETS_TO_BUILD=X86 \
-  -DLLVM_ENABLE_PROJECTS="clang;libcxxabi;libcxx" \
+  -DLLVM_ENABLE_PROJECTS="clang;libcxx;libcxxabi" \
   -DCMAKE_BUILD_TYPE=Release \
   -DWITH_POLLY=ON \
   -DCMAKE_INSTALL_PREFIX=/opt/llvm \
@@ -62,7 +66,6 @@ RUN cmake -G "Unix Makefiles" \
   -DLLDB_ENABLE_PYTHON=ON \
   ${LLVM_SRC_DIR}
 
-
 RUN make -j$(nproc)
 RUN make install
 
@@ -70,27 +73,22 @@ RUN make install
 FROM ${BASE_IMAGE}
 
 SHELL ["/bin/bash", "-c"]
-ENV DEBIAN_FRONTEND noninteractive
-
-ENV LANG C.UTF-8
-ENV LC_ALL C.UTF-8
-ENV TZ=Asia/Tokyo
+ENV DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=Asia/Tokyo
 
 RUN apt update -q -qq && \
     apt install -y -q -qq tzdata && \
     apt install -y -q -qq g++  wget make gcc g++ python3 libffi-dev \
                                zlib1g-dev libxml2-dev python3-pygments python3-yaml \
                                libncurses-dev liblzma-dev libedit-dev swig pkg-config && \
-apt clean -q -y && \
+    apt clean -q -y && \
     rm -rf /var/lib/apt/lists/
 
-ENV PATH=/opt/llvm/bin:$PATH
-ENV LD_LIBRARY_PATH=/opt/llvm/lib:$LD_LIBRARY_PATH
-ENV CC=clang
-ENV CXX=clang++
+ENV PATH=/opt/llvm/bin:$PATH LD_LIBRARY_PATH=/opt/llvm/lib:$LD_LIBRARY_PATH CC=clang CXX=clang++
 #ENV CFLAGS='-O3'
 #ENV CXXFLAGS='-O3'
 #ENV CFLAGS='-O3'
 #ENV CXXFLAGS='-stdlib=libc++ -O3'
 
 COPY --from=builder /opt/llvm/ opt/llvm
+
+# docker build . -f Dockerfile.clang_for_clasp -t clang:for_clasp
