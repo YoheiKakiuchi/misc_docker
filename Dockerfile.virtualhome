@@ -43,9 +43,12 @@ COPY linux_exec.zip .
 RUN cd /src/virtualhome/simulation/unity_simulator; unzip -qq /src/virtualhome/linux_exec.zip; rm /src/virtualhome/linux_exec.zip
 
 ## docker build -f Dockerfile.virtualhome -t test_vh .
+#
 ## DOCKER_IMAGE=test_vh ./run.sh
-## DOCKER_IMAGE=test_aist_vh ./run.sh
 ## /src/virtualhome/simulation/unity_simulator/linux_exec.v2.2.4.x86_64 -screen-fullscreen 0 -screen-quality 4
+#
+## DOCKER_IMAGE=test_aist_vh ./run.sh
 ## /src/virtualhome/simulation/unity_simulator/linux_exec.x86_64 -screen-fullscreen 0 -screen-quality 4
+## ./exec.sh
 ## cd /src/virtualhome/demo; jupyter-notebook --allow-root
 ## cd /src/virtualhome/demo; cp /userdir/demo_vh.py . ; python3 demo_vh.py
