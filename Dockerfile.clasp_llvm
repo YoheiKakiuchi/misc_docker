@@ -30,9 +30,12 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # Copy the entire clasp directory less .dockerignore and clean the build dir
 WORKDIR /claspbuild
-RUN wget https://jaist.dl.sourceforge.net/project/sbcl/sbcl/2.1.5/sbcl-2.1.5-x86-64-linux-binary.tar.bz2
-RUN tar xf sbcl-2.1.5-x86-64-linux-binary.tar.bz2
-RUN (cd sbcl-2.1.5-x86-64-linux && sh install.sh)
+#RUN wget https://jaist.dl.sourceforge.net/project/sbcl/sbcl/2.1.5/sbcl-2.1.5-x86-64-linux-binary.tar.bz2
+#RUN tar xf sbcl-2.1.5-x86-64-linux-binary.tar.bz2
+#RUN (cd sbcl-2.1.5-x86-64-linux && sh install.sh)
+RUN wget http://prdownloads.sourceforge.net/sbcl/sbcl-2.1.9-x86-64-linux-binary.tar.bz2
+RUN tar xf sbcl-2.1.9-x86-64-linux-binary.tar.bz2
+RUN (cd sbcl-2.1.9-x86-64-linux && sh install.sh)
 
 ADD . clasp
 # RUN git clone --depth=1 https://github.com/clasp-developers/clasp.git clasp
@@ -79,3 +82,6 @@ RUN ./waf -j $(nproc) build_cboehm
 RUN ./waf install_cboehm
 #RUN ./waf -j $(nproc) build_dboehm
 #RUN ./waf install_dboehm
+
+## success
+## commit 8f4cc3df40d5c4260099feeb1f558a7d060a950f (HEAD -> main, origin/main)
