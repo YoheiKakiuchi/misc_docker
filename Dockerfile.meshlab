@@ -10,7 +10,7 @@ ENV LC_ALL C.UTF-8
 
 # Install APT packages
 RUN apt update -q -qq && \
-    apt install -y -q -qq qt5-default qttools5-dev-tools qtdeclarative5-dev \
+    apt install -y -q -qq qt5-default qttools5-dev-tools qtdeclarative5-dev libcgal-dev \
                           mesa-common-dev libglu1-mesa-dev libglew-dev lib3ds-dev libeigen3-dev \
                           libopenctm-dev libgmp-dev libqhull-dev libfuse2 patchelf \
                           cmake curl git && \
@@ -33,9 +33,9 @@ RUN git clone https://github.com/cnr-isti-vclab/meshlab.git ${SRC_DIR}
 ARG TAG_FOR_BUILD=Meshlab-2021.05
 WORKDIR ${ROOT_DIR}/${SRC_DIR}
 RUN git checkout -b check_tag ${TAG_FOR_BUILD}
-RUN git submodule init
-RUN git submodule update
+RUN git submodule update --init --recursive
 
+## 
 ## original build
 #RUN bash scripts/Linux/1_build.sh --double_precision --install_path=/meshlab -j$(nproc)
 #ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/meshlab/usr/lib/meshlab
@@ -56,15 +56,12 @@ RUN make install
 FROM ${BASE_IMAGE}
 
 SHELL ["/bin/bash", "-c"]
-ENV DEBIAN_FRONTEND noninteractive
 
-ENV LANG C.UTF-8
-ENV LC_ALL C.UTF-8
-ENV TZ=Asia/Tokyo
+ENV DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=Asia/Tokyo
 
 RUN apt update -q -qq && \
     apt install -y -q -qq tzdata && \
-    apt install -y -q -qq qt5-default qttools5-dev-tools qtdeclarative5-dev \
+    apt install -y -q -qq qt5-default qttools5-dev-tools qtdeclarative5-dev libcgal-dev \
                           mesa-common-dev libglu1-mesa-dev libglew-dev lib3ds-dev libeigen3-dev \
                           libopenctm-dev libgmp-dev libqhull-dev libfuse2 patchelf && \
     apt install -y -q -qq libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-render-util0-dev libxcb-xinerama0-dev && \

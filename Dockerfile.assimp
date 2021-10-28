@@ -30,11 +30,8 @@ RUN make install
 FROM ${BASE_IMAGE}
 
 SHELL ["/bin/bash", "-c"]
-ENV DEBIAN_FRONTEND noninteractive
 
-ENV LANG C.UTF-8
-ENV LC_ALL C.UTF-8
-ENV TZ=Asia/Tokyo
+ENV DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=Asia/Tokyo
 
 RUN apt update -q -qq && \
     apt install -y -q -qq tzdata && \
