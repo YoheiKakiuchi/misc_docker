@@ -8,7 +8,7 @@ do
     # echo "OPT: $OPT"
     case $OPT in
         --default-command)
-            DEFUALT_COMMAND=$2
+            DEFAULT_COMMAND=$2
             shift
             ;;
         --user-directory)
