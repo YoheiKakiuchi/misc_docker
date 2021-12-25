@@ -58,9 +58,9 @@
     <script src="app/error-handler.js"></script>
     <script type="module" crossorigin="anonymous" src="app/ui.js"></script>
 
+  <!-- start: scripts for using gamepad with rosbridge -->
   <script src="https://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
   <script src="https://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
-
   <script>
   var rAF = window.requestAnimationFrame;
 
@@ -118,7 +118,8 @@ function update_pads() {
     rAF(update_pads);
 }
   rAF(update_pads);
-</script>
+  </script>
+  <!-- end: scripts for using gamepad with rosbridge -->
 </head>
 
 <body>
