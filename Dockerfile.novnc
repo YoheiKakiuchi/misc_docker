@@ -38,6 +38,11 @@ RUN wget https://jaist.dl.sourceforge.net/project/virtualgl/${VIRTUALGL_VERSION}
 RUN pip3 install -U setuptools wheel
 RUN pip3 install -U websockify
 
-## TODO ##
-### COPY html
-### supervisor settings
+COPY app/ /app
+COPY html /novnc
+
+ENV DISPLAY=:0 NOVNC_WEB_PORT=80
+
+EXPOSE 80
+
+CMD ["supervisord", "-c", "/app/supervisord.conf"]

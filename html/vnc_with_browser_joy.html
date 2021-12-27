@@ -62,14 +62,31 @@
   <script src="https://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
   <script src="https://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
   <script>
-  var rAF = window.requestAnimationFrame;
+  // parse parameters
+  const params = new URLSearchParams(window.location.search);
+  var nodebug = params.get('nodebug');
+  var wsport = params.get('wsport');
+  var wsaddress = params.get('wsaddress');
+  var debug = true;
+  if (nodebug) {
+    console.log('run without debug print');
+    debug = false;
+  }
+  var use_rosbridge = false;
+  if ( wsport && wsaddress ) {
+    use_rosbridge = true;
+    console.log('start with wsport=' + wsport + ', wsaddress=' + wsaddress);
+  }
 
+  if (use_rosbridge) {
+  var rAF = window.requestAnimationFrame;
   // Connecting to ROS
   // -----------------
   var ros = new ROSLIB.Ros();
 
+  try {
   // Create a connection to the rosbridge WebSocket server.
-  ros.connect('ws://localhost:9090');
+  ros.connect('ws://' + wsaddress + ':' + wsport);
 
   // Create a Topic object
   var joy_talker = new ROSLIB.Topic({
@@ -118,6 +135,10 @@ function update_pads() {
     rAF(update_pads);
 }
   rAF(update_pads);
+  } catch (e) {
+    console.log('websocket/ROS error: ' + e.message);
+  }
+  } // if (use_rosbridge) { ...
   </script>
   <!-- end: scripts for using gamepad with rosbridge -->
 </head>

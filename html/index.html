@@ -6,7 +6,16 @@
 </head>
 <body>
   <script>
-    window.location.href = "/vnc_with_browser_joy.html?autoconnect=1&resize=remote";
+    const url = new URL(window.location);
+    const cur_hostname = url.hostname;
+    const cur_port = url.port;
+    const params = url.searchParams;
+    const wsport = params.get('wsport')
+    const wsaddr = params.get('wsaddress')
+
+    var loc_href = '/vnc_with_browser_joy.html?autoconnect=1&resize=remote'
+    if (wsport && wsaddr)  loc_href += ( '&wsport=' + wsport + '&wsaddress=' + wsaddr );
+    window.location.href = loc_href
   </script>
 </body>
 </html>
