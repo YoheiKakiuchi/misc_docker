@@ -129,7 +129,9 @@ function update_pads() {
             buttons: btn
         });
         joy_talker.publish(msg);
-        console.log("pad:[" + update_count + "] " + prev_stamp);
+        if ( debug ) {
+           console.log("pad:[" + update_count + "] " + prev_stamp);
+        }
     }
     update_count += 1;
     rAF(update_pads);

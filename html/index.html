@@ -13,7 +13,7 @@
     const wsport = params.get('wsport')
     const wsaddr = params.get('wsaddress')
 
-    var loc_href = '/vnc_with_browser_joy.html?autoconnect=1&resize=remote'
+    var loc_href = '/vnc_with_browser_joy.html?autoconnect=1&resize=remote&nodebug=1'
     if (wsport && wsaddr)  loc_href += ( '&wsport=' + wsport + '&wsaddress=' + wsaddr );
     window.location.href = loc_href
   </script>
