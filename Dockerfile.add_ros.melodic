@@ -38,7 +38,7 @@ ENV ROS_DISTRO=melodic LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 # install ros packages
 RUN apt-get update -q -qq && apt-get install -q -qq -y --no-install-recommends \
-    ros-melodic-ros-core=1.5.0-1* \
+    ros-melodic-ros-core=1.4.1-0* \
     && rm -rf /var/lib/apt/lists/*
 
 # install bootstrap tools
@@ -55,6 +55,6 @@ RUN rosdep init && \
 
 # install ros packages
 RUN apt-get update -q -qq && apt-get install -q -qq -y --no-install-recommends \
-    ros-melodic-ros-base=1.5.0-1* \
+    ros-melodic-ros-base=1.4.1-0* \
     ros-melodic-rosbridge-server ros-melodic-roswww ros-melodic-rviz \
     && rm -rf /var/lib/apt/lists/*
