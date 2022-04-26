@@ -1,0 +1,40 @@
+- git:
+    local-name: hrpsys
+    uri: git@github.com:YutaKojio/hrpsys-base.git
+    version: auto-stabilizer-archive
+- git:
+    local-name: openhrp3
+    uri: git@github.com:fkanehiro/openhrp3.git
+- git:
+    local-name: rtm-ros-robotics/rtmros_common
+    uri: git@github.com:YutaKojio/rtmros_common.git
+    version: auto-stabilizer-archive
+- git:
+    local-name: rtm-ros-robotics/rtmros_tutorials
+    uri: git@github.com:YutaKojio/rtmros_tutorials.git
+    version: auto-stabilizer-archive
+#>>- git:
+#>>    local-name: jsk-ros-pkg/euslib
+#>>    uri: git@github.com:YutaKojio/euslib.git
+#>>    version: auto-stabilizer-archive
+# シミュレーション固有
+- git:
+    local-name: rtm-ros-robotics/rtmros_choreonoid
+    uri: git@github.com:start-jsk/rtmros_choreonoid.git
+    version: auto-stabilizer-archive
+#>>- git:
+#>>    local-name: choreonoid
+#>>    uri: git@github.com:choreonoid/choreonoid.git
+#>>    version: release-1.7
+#>># 実機固有
+#>>- git:
+#>>    local-name: jsk-ros-pkg/trans_system
+#>>    uri: git@github.com:YutaKojio/trans_system.git
+#>>    version: auto-stabilizer-archive
+#>>- git:
+#>>    local-name: multisense_ros
+#>>    uri: git@github.com:Naoki-Hiraoka/multisense_ros
+#>>    version: 3.4.9_fixed
+#>>- git:
+#>>    local-name: rtm-ros-robotics/rtmros_hrp2
+#>>    uri: git@github.com:start-jsk/rtmros_hrp2.git

@@ -1,0 +1,6 @@
+必要ディレクトリ
+
+kojio/kojio -> kojio.rosinstall でインストールされるもの
+kojio/kojio_wheel -> kojio_wheel.rosinstall でインストールされるもの
+
+trans_robot_model_p (branch: auto-stabilizer)

@@ -1,0 +1,42 @@
+- git:
+    local-name: hrpsys
+    uri: git@github.com:YutaKojio/hrpsys-base.git
+    version: auto-stabilizer-wheel
+- git:
+    local-name: openhrp3
+    uri: git@github.com:fkanehiro/openhrp3.git
+- git:
+    local-name: rtm-ros-robotics/rtmros_common
+    uri: git@github.com:YutaKojio/rtmros_common.git
+    version: auto-stabilizer-wheel
+#>>- git:
+#>>    local-name: trans_robot_model_p
+#>>    uri: https://gitlab.jsk.imi.i.u-tokyo.ac.jp/model_p/trans_robot_model_p
+#>>    version: auto-stabilizer
+#>>- git:
+#>>    local-name: choreonoid
+#>>    uri: git@github.com:choreonoid/choreonoid.git
+#>>    version: release-1.7
+- git:
+    local-name: rtm-ros-robotics/rtmros_choreonoid
+    uri: git@github.com:start-jsk/rtmros_choreonoid.git
+- git:
+    local-name: log_plotter
+    uri: git@github.com:YutaKojio/log_plotter.git
+    version: kojio-branch
+# - git:
+#     local-name: multisense
+#     uri: git@github.com:Naoki-Hiraoka/multisense_ros
+#     version: 3.4.9_fixed
+# - git:
+#     local-name: jsk-ros-pkg/jsk_model_tools
+#     uri: git@github.com:jsk-ros-pkg/jsk_model_tools.git
+# - git:
+#     local-name: jsk-ros-pkg/jsk_common
+#     uri: git@github.com:jsk-ros-pkg/jsk_common.git
+# - git:
+#     local-name: jsk-ros-pkg/jsk_control
+#     uri: git@github.com:jsk-ros-pkg/jsk_control.git
+# - git:
+#     local-name: jsk-ros-pkg/jsk_3rdparty
+#     uri: git@github.com:jsk-ros-pkg/jsk_3rdparty.git

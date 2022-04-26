@@ -1,0 +1,18 @@
+## irslrepo/humanoid_sim
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+LABEL maintainer "YoheiKakiuchi <kakiuchi.yohei.sw@tut.jp>"
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /kojio_ws
+
+COPY kojio/kojio src
+
+RUN (cd src/hrpsys; sed -i "35iadd_definitions(-Wno-deprecated)" CMakeLists.txt)
+RUN (cd src/hrpsys; sed -i -e 's/option(ENABLE_DOXYGEN "Use Doxygen" ON/option(ENABLE_DOXYGEN "Use Doxygen" OFF/' CMakeLists.txt)
+RUN (cd src/openhrp3; sed -i -e 's/option(ENABLE_DOXYGEN "Use Doxygen" ON/option(ENABLE_DOXYGEN "Use Doxygen" OFF/' CMakeLists.txt)
+
+RUN /bin/bash -c "source /catkin_ws/devel/setup.bash && catkin build hrpsys_choreonoid_tutorials hrpsys_ros_bridge_tutorials --no-status --no-notify -p 1 -j 8 && catkin clean -b -l -y"

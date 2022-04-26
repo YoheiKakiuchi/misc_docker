@@ -24,7 +24,7 @@ RUN apt update -q -qq && \
 #RUN patch -p1 -d src/choreonoid < src/rtmros_choreonoid/choreonoid.patch
 RUN curl -sL https://github.com/start-jsk/rtmros_choreonoid/raw/master/choreonoid.patch | patch -p1 -d src/choreonoid
 
-RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && catkin config --install && catkin build choreonoid --no-status --no-notify -p 1 && catkin clean -d -b -l -y"
+RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && catkin config --install && catkin build choreonoid --no-status --no-notify -p 1 && catkin clean -b -l -y"
 
 ### install rtmros_choreonoid
 ENV MY_ROSWORKSPACE /catkin_ws
