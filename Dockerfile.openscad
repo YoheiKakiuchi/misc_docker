@@ -1,0 +1,59 @@
+ARG BASE_IMAGE=ubuntu:20.04
+FROM ${BASE_IMAGE} as builder
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND noninteractive
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+ENV TZ Asia/Tokyo
+
+# Install APT packages
+RUN apt update -q -qq && \
+    apt install -y -q -qq wget git gnupg software-properties-common tzdata && \
+    apt clean -q -y && \
+    rm -rf /var/lib/apt/lists/
+
+ARG ROOT_DIR=/src_build
+ARG SRC_DIR=openscad
+ARG BUILD_DIR=build
+
+ARG TAG_FOR_BUILD=openscad-2021.01
+WORKDIR ${ROOT_DIR}
+RUN git clone https://github.com/openscad/openscad.git ${SRC_DIR}
+RUN (cd ${SRC_DIR}; git checkout -b check_tag ${TAG_FOR_BUILD}; git submodule update --init --recursive )
+RUN apt update -q -qq && \
+    sed -i -e 's@sudo@@g' ${SRC_DIR}/scripts/travis-ci-before-install-linux.sh && \
+    ${SRC_DIR}/scripts/travis-ci-before-install-linux.sh focal > /dev/null && \
+    apt install -q -qq -y qt5-default gettext gcovr libxml2-dev libcairo-dev && \
+    apt clean -q -y && \
+    rm -rf /var/lib/apt/lists/
+
+WORKDIR ${ROOT_DIR}/${BUILD_DIR}
+RUN cmake -DCMAKE_INSTALL_PREFIX=/opt/openscad -DEXPERIMENTAL=ON -DCMAKE_BUILD_TYPE=Release ${ROOT_DIR}/${SRC_DIR}
+RUN make -j$(nproc)
+## install
+RUN make install
+
+## final stage
+FROM ${BASE_IMAGE}
+
+SHELL ["/bin/bash", "-c"]
+
+ENV DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=Asia/Tokyo
+
+COPY --from=builder /opt/openscad /opt/openscad
+# COPY --from=builder ${ROOT_DIR}/${SRC_DIR}/scripts/uni-get-dependencies.sh /tmp
+COPY --from=builder ${ROOT_DIR}/${SRC_DIR}/scripts/travis-ci-before-install-linux.sh /tmp
+
+RUN apt update -q -qq && \
+    apt install -y -q -qq tzdata && \
+    /tmp/scripts/travis-ci-before-install-linux.sh > /dev/null && \
+    apt clean -q -y && \
+    rm -rf /var/lib/apt/lists/
+
+## python3 python3-pip
+ENV PATH=/opt/openscad/bin:$PATH LD_LIBRARY_PATH=/opt/openscad/lib:$LD_LIBRARY_PATH
+
+## tzdata
+## openscad
+## python3-pip

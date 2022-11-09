@@ -1,0 +1,37 @@
+ARG BUILD_IMAGE=ubuntu:20.04
+ARG BASE_IMAGE=${BUILD_IMAGE}
+FROM ${BUILD_IMAGE} as builder
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND noninteractive
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
+## libomp-dev
+RUN apt update -q -qq && \
+    apt install -y -q -qq wget xz-utils && \
+    apt clean -q -y && \
+    rm -rf /var/lib/apt/lists/
+
+WORKDIR /src
+RUN wget https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz -q -O clang.tar.xz
+RUN mkdir /opt/llvm
+RUN tar xJf clang.tar.xz -C /opt/llvm --strip-components=1
+
+## final stage
+FROM ${BASE_IMAGE}
+
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive LANG=C.UTF-8 LC_ALL=C.UTF-8 TZ=Asia/Tokyo
+
+RUN apt update -q -qq && \
+    apt install -y -q -qq tzdata && \
+    apt install -y -q -qq g++  wget make gcc g++ python3 libffi-dev \
+                               zlib1g-dev libxml2-dev python3-pygments python3-yaml \
+                               libncurses-dev liblzma-dev libedit-dev swig pkg-config && \
+    apt clean -q -y && \
+    rm -rf /var/lib/apt/lists/
+
+ENV CC=clang CXX=clang++ PATH=/opt/llvm/bin:$PATH LD_LIBRARY_PATH=/opt/llvm/lib:$LD_LIBRARY_PATH
+
+COPY --from=builder /opt/llvm/ opt/llvm
